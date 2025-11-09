@@ -9,13 +9,13 @@
 
     <style>
         :root {
-            --color-primary: #222;
-            --color-secondary: #666;
-            --color-accent: #FFD700;
+            --color-primary: #222; 
+            --color-secondary: #666; 
+            --color-accent: #FFD700; 
             --color-text-dark: #222; 
-            --color-text-light: #fff;
-            --color-background-soft: #f8f8f8;
-            --color-error: #FF4500;
+            --color-text-light: #fff; 
+            --color-background-soft: #f8f8f8; 
+            --color-error: #FF4500; 
             --font-heading: 'Poppins', sans-serif; 
             --font-body: 'Merriweather', serif; 
             --border-radius-large: 12px;
@@ -37,11 +37,11 @@
         }
 
         .page-view {
-            display: none;
+            display: none; 
             min-height: 100vh;
         }
         .page-view.active {
-            display: block;
+            display: block; 
         }
         
         .container {
@@ -66,7 +66,7 @@
             max-width: 450px;
             background-color: #fff;
             border-radius: var(--border-radius-large);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7); 
             overflow: hidden; 
             padding: 30px;
         }
@@ -216,7 +216,7 @@
             color: white;
         }
         .dashboard-content .button--delete {
-            background-color: var(--color-error);
+            background-color: var(--color-error); 
             color: white;
         }
         .dashboard-content .button--primary:hover {
@@ -260,7 +260,7 @@
                         <label for="password">Password</label>
                         <input type="password" id="password" required>
                     </div>
-                    <button type="submit" class="button button--primary">Log In</button>
+                    <button type="submit" class="button button--primary">Log In Securely</button>
                     <p class="form-footer">
                         New user? <a href="#" id="register-link">Register Here (Simulated)</a>
                     </p>
@@ -278,11 +278,7 @@
                     <a href="#" id="auth-link" onclick="navigateTo('login')">Login / Register</a>
                 </nav>
             </div>
-            <div class="hero-search">
-                <h2>Discover Your Next Community</h2>
-                <input type="text" placeholder="Search by City, Neighborhood, or Name..." class="search-input">
-            </div>
-        </header>
+            </header>
 
         <main class="hostel-gallery container">
             <h3>Available Hostels</h3>
@@ -318,7 +314,7 @@
                             <span class="detail-price">**$<span id="detail-rent"></span>/month+**</span>
                         </div>
                         <p id="detail-description"></p>
-                        </div>
+                    </div>
                 </section>
 
                 <div class="detail-content-grid">
@@ -541,6 +537,7 @@
             `;
         };
 
+
         const renderOwnerDashboard = (ownerUsername) => {
             const ownerView = document.getElementById('owner-view');
             if (!ownerView) return;
@@ -558,7 +555,7 @@
 
                 ownerListings.forEach(hostel => {
                     content += `
-                    <tr>
+                        <tr>
                             <td>${hostel.name}</td>
                             <td>${hostel.rating.toFixed(1)}</td>
                             <td>
@@ -578,6 +575,7 @@
                 ${content}
             `;
         };
+
         
         const renderHostelCards = () => {
             const container = document.getElementById('hostel-list-container');
