@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Facilitator - Sprint 1</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* gray-900 */
+            color: #f3f4f6; /* gray-100 */
+        }
+        .view { display: none; }
+        .active-view { display: block; }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.75);
+        }
+        .modal {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .hero-bg {
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("./young-friends-hostel.jpg");
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-900">
+
+    <div id="app" class="min-h-screen flex flex-col">
+
+        <header class="bg-gray-900 shadow-lg sticky top-0 z-40 border-b border-gray-700">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <a href="#" class="text-2xl font-bold text-white flex items-center gap-2" onclick="app.navigateTo('welcome')">
+                            <img src="./2-removebg-preview.png" height="100px" width="100px">
+                        </a>
+                    </div>
+                    <div class="hidden md:block">
+                        <div id="nav-links" class="ml-10 flex items-baseline space-x-4">
+                            </div>
+                    </div>
+                    <div class="hidden md:block">
+                        <div id="auth-buttons" class="flex items-center space-x-2">
+                             </div>
+                    </div>
+                    <div class="-mr-2 flex md:hidden">
+                        <button type="button" id="mobile-menu-button" class="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                            <span class="sr-only">Open main menu</span>
+                            <svg class="h-6 w-6" id="mobile-menu-icon-open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                             <svg class="h-6 w-6 hidden" id="mobile-menu-icon-close" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div class="md:hidden hidden" id="mobile-menu">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3" id="mobile-nav-links">
+                    </div>
+                <div class="pt-4 pb-3 border-t border-gray-700">
+                    <div class="px-2 space-y-1" id="mobile-auth-buttons">
+                        </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-grow">
+            
+            <div id="welcome-view" class="view">
+                <div class="hero-bg">
+                    <div class="min-h-[80vh] flex items-center justify-center">
+                        <div class="text-center p-4">
+                            <h1 class="text-5xl md:text-7xl font-extrabold text-white uppercase tracking-wider" style="text-shadow: 2px 2px 8px rgba(0,0,0,0.7);">
+                                Welcome to
+                                <br class="block md:hidden">
+                                <span class="block mt-2">Hostel Facilitator</span>
+                            </h1>
+                            <p class="mt-4 text-xl text-gray-200 max-w-2xl mx-auto" style="text-shadow: 1px 1px 4px rgba(0,0,0,0.7);">
+                                Your trusted partner in finding the perfect hostel in Islamabad.
+                            </p>
+                             <button onclick="app.navigateTo('hostels')" class="mt-8 px-8 py-3 bg-slate-600 text-white font-semibold rounded-lg shadow-lg hover:bg-slate-700 transition-transform transform hover:scale-105">
+                                Find a Hostel Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 py-16 md:py-24">
+                    <div class="container mx-auto px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 class="text-4xl font-extrabold text-white mb-4 uppercase">About Our Platform</h2>
+                            <p class="text-gray-300 text-lg mb-4">
+                                We address the lack of reliable information and transparency about hostel options in Islamabad for students and job holders relocating to the city.
+                            </p>
+                            <p class="text-gray-400">
+                                Our platform allows hostel seekers to explore a wide range of options, read real tenant reviews, and view ratings. We empower you to make informed decisions, avoid exploitation, and find a safe and suitable place to live.
+                            </p>
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <img src="./young-hostel.jpg" class="rounded-lg shadow-2xl">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-900 py-16 md:py-24">
+                    <div class="container mx-auto px-6 lg:px-8">
+                        <h2 class="text-4xl font-extrabold text-white text-center mb-12 uppercase">Meet the Team</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div class="text-center p-6 bg-gray-800 rounded-lg shadow-xl transform transition-transform hover:scale-105">
+                                <img src="https://placehold.co/150x150/475569/ffffff?text=Faisal" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-slate-500">
+                                <h3 class="text-2xl font-semibold text-white">Faisal</h3>
+                                <p class="text-slate-400">Product Owner</p>
+                            </div>
+                            <div class="text-center p-6 bg-gray-800 rounded-lg shadow-xl transform transition-transform hover:scale-105">
+                                <img src="https://placehold.co/150x150/475569/ffffff?text=Huzaifa" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-slate-500">
+                                <h3 class="text-2xl font-semibold text-white">Huzaifa Ali</h3>
+                                <p class="text-slate-400">Scrum Master</p>
+                            </div>
+                            <div class="text-center p-6 bg-gray-800 rounded-lg shadow-xl transform transition-transform hover:scale-105">
+                                <img src="https://placehold.co/150x150/475569/ffffff?text=Burhan" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-slate-500">
+                                <h3 class="text-2xl font-semibold text-white">Burhan Ahmed</h3>
+                                <p class="text-slate-400">Scrum Team</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="hostels-view" class="view">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <h1 class="text-4xl font-bold text-white text-center mb-8">Hostel Listings</h1>
+                    <div id="hostel-listings" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        </div>
+                    <div id="no-results" class="hidden text-center py-16">
+                        <i data-lucide="search-x" class="w-16 h-16 mx-auto text-slate-500"></i>
+                        <h3 class="mt-4 text-xl font-semibold text-slate-300">No Hostels Found</h3>
+                        <p class="mt-2 text-slate-400">No hostels are currently approved.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="login-view" class="view flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+                </div>
+            
+            <div id="signup-view" class="view flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+                </div>
+
+            <div id="details-view" class="view container mx-auto p-4 md:p-8 fade-in">
+                </div>
+
+             <div id="owner-dashboard-view" class="view container mx-auto p-4 md:p-8 fade-in">
+                 <h2 class="text-3xl font-bold text-white mb-6">Owner Dashboard</h2>
+                 <div id="owner-dashboard-content">
+                    </div>
+            </div>
+
+            <div id="admin-dashboard-view" class="view container mx-auto p-4 md:p-8 fade-in">
+                <h2 class="text-3xl font-bold text-white mb-6">Admin Dashboard</h2>
+                 <div id="admin-dashboard-content">
+                    </div>
+            </div>
+            
+        </main>
+
+        <footer class="bg-gray-900 border-t border-gray-700">
+            <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+                 <div class="flex justify-center space-x-6 mb-4">
+                    <a href="#" onclick="app.navigateTo('welcome')" class="hover:text-white">Welcome</a>
+                    <a href="#" onclick="app.navigateTo('hostels')" class="hover:text-white">Hostels</a>
+                </div>
+                <p>&copy; 2025 Hostel Facilitator. All rights reserved.</p>
+                 <p class="text-sm mt-1">Created by Burhan Ahmed, Faisal & Huzaifa Ali</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <div id="modal-container" class="hidden fixed inset-0 z-50"></div>
+    
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2"></div>
+
+
+    <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Application Logic
+    const app = {
+        
+        // S T A T E
+        state: {
+            currentUser: null, // { id, name, email, role, history: [] }
+            currentView: 'welcome', // Default view is now 'welcome'
+            hostels: [],
+            users: [],
+        },
+
+        // I N I T I A L I Z A T I O N
+        init() {
+            this.generateMockData();
+            this.addEventListeners();
+            this.render();
+            // Check for logged in user in localStorage
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                this.state.currentUser = JSON.parse(user);
+            }
+            this.navigateTo(this.state.currentView);
+        },
+        
+        // R E N D E R I N G
+        render() {
+            // Render current view
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active-view'));
+            const view = document.getElementById(`${this.state.currentView}-view`);
+            if (view) {
+                view.classList.add('active-view');
+            } else {
+                 document.getElementById(`welcome-view`).classList.add('active-view');
+            }
+            
+            // Clear content of login/signup views when navigating away
+            if (this.state.currentView !== 'login') {
+                document.getElementById('login-view').innerHTML = '';
+            }
+             if (this.state.currentView !== 'signup') {
+                document.getElementById('signup-view').innerHTML = '';
+            }
+
+
+            this.renderNav();
+            
+            // Re-render specific content based on view
+            switch (this.state.currentView) {
+                case 'hostels': // Changed from 'home'
+                    this.renderHostelListings();
+                    break;
+                case 'owner-dashboard':
+                    this.renderOwnerDashboard();
+                    break;
+                case 'admin-dashboard':
+                    this.renderAdminDashboard();
+                    break;
+                // 'welcome' view is static HTML, no render function needed
+            }
+
+            lucide.createIcons();
+        },
+
+        renderNav() {
+            const navLinks = document.getElementById('nav-links');
+            const authButtons = document.getElementById('auth-buttons');
+            const mobileNavLinks = document.getElementById('mobile-nav-links');
+            const mobileAuthButtons = document.getElementById('mobile-auth-buttons');
+
+            let navHtml = `
+                <a href="#" onclick="app.navigateTo('welcome')" class="px-3 py-2 rounded-md text-sm font-medium ${this.state.currentView === 'welcome' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}">Welcome</a>
+                <a href="#" onclick="app.navigateTo('hostels')" class="px-3 py-2 rounded-md text-sm font-medium ${this.state.currentView === 'hostels' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}">Hostels</a>
+            `;
+            let authHtml = '';
+
+            if (this.state.currentUser) {
+                switch(this.state.currentUser.role) {
+                    case 'user':
+                        // No user-specific nav links in Sprint 1
+                        break;
+                    case 'owner':
+                        navHtml += `<a href="#" onclick="app.navigateTo('owner-dashboard')" class="px-3 py-2 rounded-md text-sm font-medium ${this.state.currentView === 'owner-dashboard' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}">Dashboard</a>`;
+                        break;
+                    case 'admin':
+                        navHtml += `<a href="#" onclick="app.navigateTo('admin-dashboard')" class="px-3 py-2 rounded-md text-sm font-medium ${this.state.currentView === 'admin-dashboard' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'}">Dashboard</a>`;
+                        break;
+                }
+                authHtml = `
+                    <span class="text-gray-300 text-sm">Welcome, ${this.state.currentUser.name}!</span>
+                    <button onclick="app.logout()" class="ml-4 px-3 py-2 rounded-md text-sm font-medium text-white bg-slate-600 hover:bg-slate-700">Logout</button>`;
+            } else {
+                authHtml = `
+                    <button onclick="app.navigateTo('login')" class="px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white">Login</button>
+                    <button onclick="app.navigateTo('signup')" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-slate-600 hover:bg-slate-700">Sign Up</button>`;
+            }
+
+            navLinks.innerHTML = navHtml;
+            authButtons.innerHTML = authHtml;
+            // Apply mobile classes
+            mobileNavLinks.innerHTML = navHtml.replaceAll('class="', 'class="block ').replaceAll('px-3', 'px-4');
+            mobileAuthButtons.innerHTML = authHtml.replaceAll('class="', 'class="block w-full text-left ').replaceAll('px-3', 'px-4').replaceAll('ml-4', 'mt-2');
+        },
+
+        // A1, H1, U1: Login View HTML
+        getLoginViewHtml() {
+            return `
+                <div class="max-w-md w-full space-y-8 bg-gray-800 p-10 rounded-xl shadow-lg border border-gray-700">
+                    <div>
+                        <h2 class="mt-6 text-center text-3xl font-extrabold text-white">Sign in to your account</h2>
+                    </div>
+                    <form id="login-form" class="mt-8 space-y-6" onsubmit="event.preventDefault(); app.login();">
+                        <div class="rounded-md shadow-sm -space-y-px">
+                            <div>
+                                <label for="email-address" class="sr-only">Email address</label>
+                                <input id="login-email" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-600 bg-gray-700 placeholder-gray-400 text-white rounded-t-md focus:outline-none focus:ring-slate-500 focus:border-slate-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                            </div>
+                            <div>
+                                <label for="password" class="sr-only">Password</label>
+                                <input id="login-password" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-600 bg-gray-700 placeholder-gray-400 text-white rounded-b-md focus:outline-none focus:ring-slate-500 focus:border-slate-500 focus:z-10 sm:text-sm" placeholder="Password">
+                            </div>
+                        </div>
+                        <p id="login-error" class="text-red-400 text-sm mt-2"></p>
+                         <div class="text-sm">
+                            <p class="font-medium text-slate-300">Test Accounts:</p>
+                            <ul class="list-disc list-inside text-slate-400">
+                                <li><b>User:</b> user@test.com</li>
+                                <li><b>Owner:</b> owner@test.com</li>
+                                <li><b>Admin:</b> admin@test.com</li>
+                                <li>(Password for all: \`password\`)</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-slate-600 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-slate-500">
+                                Sign in
+                            </button>
+                        </div>
+                        <p class="text-center text-sm text-gray-400">
+                            Don't have an account? 
+                            <a href="#" onclick="event.preventDefault(); app.navigateTo('signup')" class="font-medium text-slate-400 hover:text-white">Sign Up</a>
+                        </p>
+                    </form>
+                </div>
+            `;
+        },
+        
+        // New function: Sign Up View HTML
+        getSignupViewHtml() {
+             return `
+                <div class="max-w-md w-full space-y-8 bg-gray-800 p-10 rounded-xl shadow-lg border border-gray-700">
+                    <div>
+                        <h2 class="mt-6 text-center text-3xl font-extrabold text-white">Create a New Account</h2>
+                    </div>
+                    <form id="signup-form" class="mt-8 space-y-6" onsubmit="event.preventDefault(); app.register();">
+                        <div class="rounded-md shadow-sm space-y-3">
+                            <div>
+                                <label for="signup-name" class="sr-only">Name</label>
+                                <input id="signup-name" name="name" type="text" autocomplete="name" required class="appearance-none relative block w-full px-3 py-3 border border-gray-600 bg-gray-700 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm" placeholder="Full Name">
+                            </div>
+                            <div>
+                                <label for="signup-email" class="sr-only">Email address</label>
+                                <input id="signup-email" name="email" type="email" autocomplete="email" required class="appearance-none relative block w-full px-3 py-3 border border-gray-600 bg-gray-700 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm" placeholder="Email address">
+                            </div>
+                            <div>
+                                <label for="signup-password" class="sr-only">Password</label>
+                                <input id="signup-password" name="password" type="password" autocomplete="new-password" required class="appearance-none relative block w-full px-3 py-3 border border-gray-600 bg-gray-700 placeholder-gray-400 text-white rounded-md focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm" placeholder="Password">
+                            </div>
+                            <div>
+                                <label for="signup-role" class="block text-sm font-medium text-gray-300">Account Type</label>
+                                <select id="signup-role" name="role" required class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm">
+                                    <option value="user">Hostel Seeker (User)</option>
+                                    <option value="owner">Hostel Manager (Owner)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p id="signup-error" class="text-red-400 text-sm mt-2"></p>
+                        <div>
+                            <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-green-500">
+                                Register
+                            </button>
+                        </div>
+                         <p class="text-center text-sm text-gray-400">
+                            Already have an account? 
+                            <a href="#" onclick="event.preventDefault(); app.navigateTo('login')" class="font-medium text-slate-400 hover:text-white">Sign In</a>
+                        </p>
+                    </form>
+                </div>
+            `;
+        },
+        
+        renderHostelListings() {
+            const container = document.getElementById('hostel-listings');
+            const noResults = document.getElementById('no-results');
+            
+            // U2: View Hostel Cards - Only show approved hostels
+            const approvedHostels = this.state.hostels.filter(hostel => hostel.status === 'approved');
+
+            if (approvedHostels.length === 0) {
+                container.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            container.innerHTML = approvedHostels.map(hostel => this.getHostelCardHtml(hostel)).join('');
+            lucide.createIcons();
+        },
+
+        getHostelCardHtml(hostel) {
+            const avgRating = hostel.reviews.length > 0 ? (hostel.reviews.reduce((acc, r) => acc + r.rating, 0) / hostel.reviews.length).toFixed(1) : 'N/A';
+            
+            return `
+                <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 flex flex-col border border-gray-700">
+                    <div class="relative">
+                        <img src="${hostel.image}" alt="${hostel.name}" class="w-full h-48 object-cover">
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start">
+                             <h3 class="text-lg font-semibold text-white truncate">${hostel.name}</h3>
+                             <div class="flex items-center text-sm ml-2 flex-shrink-0">
+                                <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                                <span class="ml-1 text-gray-300">${avgRating}</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-400 mt-1 flex items-center"><i data-lucide="map-pin" class="w-4 h-4 mr-1"></i>${hostel.area}</p>
+                        <p class="text-sm text-gray-400 mt-1">For ${hostel.gender} ${hostel.profession}s</p>
+                        <p class="text-xl font-bold text-white my-2">PKR ${hostel.rent.toLocaleString()}<span class="text-sm font-normal text-gray-400">/month</span></p>
+                        <div class="mt-auto pt-4 border-t border-gray-700 flex justify-between items-center">
+                            <button onclick="app.viewDetails(${hostel.id})" class="text-sm font-medium text-slate-300 hover:text-white">View Details</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderDetails(hostel) {
+            const container = document.getElementById('details-view');
+            const avgRating = hostel.reviews.length > 0 ? (hostel.reviews.reduce((acc, r) => acc + r.rating, 0) / hostel.reviews.length).toFixed(1) : 'N/A';
+            const userHasReviewed = this.state.currentUser && hostel.reviews.some(r => r.userId === this.state.currentUser.id);
+            
+            container.innerHTML = `
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                    <div class="flex flex-col md:flex-row justify-between items-start mb-6 pb-6 border-b border-gray-700">
+                        <div>
+                            <h2 class="text-4xl font-bold text-white">${hostel.name}</h2>
+                            <p class="text-md text-gray-400 mt-2 flex items-center"><i data-lucide="map-pin" class="w-5 h-5 mr-2"></i>${hostel.area}, Islamabad</p>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end flex-shrink-0">
+                            <p class="text-3xl font-bold text-white">PKR ${hostel.rent.toLocaleString()}<span class="text-lg font-normal text-gray-400"> / month</span></p>
+                            <div class="flex items-center text-lg mt-1">
+                                <i data-lucide="star" class="w-5 h-5 text-yellow-400 fill-current"></i>
+                                <span class="ml-1 font-semibold text-white">${avgRating}</span>
+                                <span class="ml-2 text-gray-400">(${hostel.reviews.length} reviews)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2">
+                            <img src="${hostel.image}" alt="${hostel.name}" class="w-full h-96 object-cover rounded-lg shadow-md mb-6">
+                            
+                            <h3 class="text-2xl font-semibold text-white mb-2">Description</h3>
+                             <p class="text-gray-300 leading-relaxed mb-6">${hostel.description}</p>
+                            
+                             <h3 class="text-2xl font-semibold text-white mb-4">Amenities</h3>
+                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                                ${hostel.amenities.map(amenity => `
+                                    <div class="flex items-center text-gray-300">
+                                        <i data-lucide="check-circle" class="w-5 h-5 text-green-500 mr-2"></i>
+                                        <span>${amenity}</span>
+                                    </div>
+                                `).join('')}
+                             </div>
+                        </div>
+
+                        <div class="lg:col-span-1">
+                            <div class="bg-gray-700 p-6 rounded-lg border border-gray-600">
+                                <h3 class="text-xl font-bold text-white mb-4">Hostel Information</h3>
+                                <div class="space-y-3 text-gray-200">
+                                    <p class="flex justify-between"><strong>Gender:</strong> <span>${hostel.gender}</span></p>
+                                    <p class="flex justify-between"><strong>Profession:</strong> <span>${hostel.profession}</span></p>
+                                </div>
+                                ${!this.state.currentUser ? `
+                                <p class="mt-6 text-center text-sm text-gray-300 p-4 bg-gray-800 rounded-md">Please <a href="#" onclick="app.navigateTo('login')" class="font-bold text-slate-300 hover:text-white">log in</a> to review or ask questions.</p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-10">
+                        <div class="border-b border-gray-700">
+                           <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                                <button id="tab-reviews" onclick="app.switchTab('reviews', ${hostel.id})" class="border-slate-500 text-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Reviews</button>
+                                <button id="tab-questions" onclick="app.switchTab('questions', ${hostel.id})" class="border-transparent text-gray-500 hover:text-gray-300 hover:border-gray-500 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Questions</button>
+                           </nav>
+                        </div>
+                        <div id="tab-content-reviews" class="py-6">
+                             ${this.state.currentUser?.role === 'user' && !userHasReviewed ? `
+                                <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+                                    <h4 class="text-lg font-semibold text-white mb-2">Write a Review</h4>
+                                    <form id="review-form">
+                                        <div class="mb-2">
+                                            <label class="block text-sm font-medium text-gray-300">Rating</label>
+                                            <div class="flex items-center" id="review-stars">
+                                                ${[1,2,3,4,5].map(star => `<i data-lucide="star" class="w-6 h-6 text-gray-500 cursor-pointer" data-value="${star}" onmouseover="app.hoverStars(${star})" onmouseout="app.resetStars()" onclick="app.selectStars(${star})"></i>`).join('')}
+                                            </div>
+                                            <input type="hidden" id="review-rating" required>
+                                        </div>
+                                        <textarea id="review-text" rows="3" class="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded-md" placeholder="Share your experience..." required></textarea>
+                                        <button type="button" onclick="app.submitReview(${hostel.id})" class="mt-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">Submit Review</button>
+                                    </form>
+                                </div>
+                             ` : ''}
+                             ${userHasReviewed ? `<p class="mb-6 p-3 bg-green-900 text-green-200 rounded-md text-sm">You have already reviewed this hostel.</p>`: ''}
+                            
+                            <div class="space-y-4">
+                                ${hostel.reviews.length > 0 ? hostel.reviews.map(review => {
+                                    const user = this.state.users.find(u => u.id === review.userId);
+                                    return `
+                                    <div class="p-4 border border-gray-700 rounded-lg bg-gray-700">
+                                        <div class="flex justify-between items-center mb-1">
+                                            <div class="flex items-center">
+                                                <div class="flex">
+                                                    ${[...Array(5)].map((_, i) => `<i data-lucide="star" class="w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-600'}"></i>`).join('')}
+                                                </div>
+                                                <p class="ml-3 font-semibold text-white">${user ? user.name : 'Anonymous'}</p>
+                                            </div>
+                                            ${this.state.currentUser?.role === 'admin' ? `<button onclick="app.removeReview(${hostel.id}, ${review.id})" class="text-xs text-red-400 hover:text-red-300">Remove</button>` : ''}
+                                        </div>
+                                        <p class="text-gray-300">${review.text}</p>
+                                    </div>
+                                    `
+                                }).join('') : '<p class="text-gray-400">No reviews yet. Be the first to write one!</p>'}
+                            </div>
+                        </div>
+                        <div id="tab-content-questions" class="py-6 hidden">
+                              ${this.state.currentUser?.role === 'user' ? `
+                                <div class="mb-6 bg-gray-700 p-4 rounded-lg border border-gray-600">
+                                    <h4 class="text-lg font-semibold text-white mb-2">Ask a Question</h4>
+                                    <form id="question-form">
+                                        <textarea id="question-text" rows="3" class="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded-md" placeholder="Type your question here..."></textarea>
+                                        <button type="button" onclick="app.submitQuestion(${hostel.id})" class="mt-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">Ask Question</button>
+                                    </form>
+                                </div>
+                             ` : ''}
+                             <div class="space-y-4">
+                                ${hostel.questions.length > 0 ? hostel.questions.map(q => {
+                                    const user = this.state.users.find(u => u.id === q.userId);
+                                    return `
+                                    <div class="p-4 border border-gray-700 rounded-lg bg-gray-700">
+                                        <p class="font-semibold text-white"><i data-lucide="help-circle" class="inline w-4 h-4 mr-1"></i>Q: ${q.text}</p>
+                                        <p class="text-sm text-gray-400 mb-2">Asked by ${user ? user.name : 'Anonymous'}</p>
+                                        ${q.answer ? `
+                                        <div class="mt-2 pl-4 border-l-2 border-slate-500">
+                                            <p class="font-semibold text-white"><i data-lucide="corner-down-right" class="inline w-4 h-4 mr-1"></i>A: ${q.answer}</p>
+                                            <p class="text-sm text-gray-400">Answered by Hostel Owner</p>
+                                        </div>
+                                        `: `<p class="mt-2 pl-4 text-sm text-gray-500 italic">Awaiting answer from owner...</p>`}
+                                    </div>
+                                    `
+                                }).join('') : '<p class="text-gray-400">No questions have been asked yet.</p>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        },
+        
+        renderOwnerDashboard() {
+            const container = document.getElementById('owner-dashboard-content');
+            if(!this.state.currentUser || this.state.currentUser.role !== 'owner') {
+                container.innerHTML = '<p>Access Denied.</p>'; return;
+            }
+            const ownerHostels = this.state.hostels.filter(h => h.ownerId === this.state.currentUser.id);
+            const unansweredQuestions = ownerHostels.flatMap(h => h.questions.filter(q => !q.answer).map(q => ({...q, hostelName: h.name, hostelId: h.id})));
+
+            container.innerHTML = `
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">My Hostel Listings</h3>
+                    <div class="space-y-4">
+                        ${ownerHostels.map(h => `
+                            <div class="flex flex-wrap justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg gap-2">
+                                <div>
+                                    <p class="font-semibold text-white">${h.name} 
+                                        <span class="text-xs font-bold ${h.status === 'approved' ? 'text-green-300 bg-green-800' : 'text-yellow-300 bg-yellow-800'} px-2 py-1 rounded-full">${h.status.toUpperCase()}</span>
+                                    </p>
+                                    <p class="text-sm text-gray-400">${h.area}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="app.showToast('Update feature coming soon!')" class="text-sm px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700">Update</button>
+                                    <button onclick="app.removeHostel(${h.id}, true)" class="text-sm px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700">Delete</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="mt-4 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700" onclick="app.showAddHostelModal()">Add New Hostel</button>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+                    <h3 class="text-2xl font-bold text-white mb-4">Pending Questions</h3>
+                    <div class="space-y-4">
+                        ${unansweredQuestions.length > 0 ? unansweredQuestions.map(q => `
+                             <div class="p-4 border border-gray-700 rounded-lg bg-gray-700"><p class="font-semibold text-white">Q: ${q.text}</p><p class="text-sm text-gray-400 mb-2">On: <span class="font-medium">${q.hostelName}</span></p><div class="flex items-center"><textarea id="answer-text-${q.id}" rows="1" class="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded-md mr-2" placeholder="Your answer..."></textarea><button onclick="app.submitAnswer(${q.hostelId}, ${q.id})" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 flex-shrink-0">Reply</button></div></div>
+                        `).join('') : '<p class="text-gray-400">No unanswered questions at the moment.</p>'}
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        },
+        
+        renderAdminDashboard() {
+             const container = document.getElementById('admin-dashboard-content');
+            if(!this.state.currentUser || this.state.currentUser.role !== 'admin') {
+                container.innerHTML = '<p>Access Denied.</p>'; return;
+            }
+
+            const pendingHostels = this.state.hostels.filter(h => h.status === 'pending');
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gray-800 border border-gray-700 p-6 rounded-lg shadow-lg text-center"><p class="text-3xl font-bold text-white">${this.state.hostels.length}</p><p class="text-gray-400">Total Hostels</p></div>
+                    <div class="bg-gray-800 border border-gray-700 p-6 rounded-lg shadow-lg text-center"><p class="text-3xl font-bold text-white">${this.state.users.filter(u=>u.role==='user').length}</p><p class="text-gray-400">Total Users</p></div>
+                    <div class="bg-gray-800 border border-gray-700 p-6 rounded-lg shadow-lg text-center"><p class="text-3xl font-bold text-white">${this.state.users.filter(u=>u.role==='owner').length}</p><p class="text-gray-400">Total Owners</p></div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">Pending Hostel Listings (${pendingHostels.length})</h3>
+                    <div class="space-y-3">
+                         ${pendingHostels.length > 0 ? pendingHostels.map(h => `<div class="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg"><div><p class="font-semibold text-white">${h.name} <span class="text-sm text-gray-400">by Owner #${h.ownerId}</span></p></div><div><button onclick="app.approveHostel(${h.id})" class="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm">Approve</button><button onclick="app.removeHostel(${h.id})" class="ml-2 px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Reject</button></div></div>`).join('') : '<p class="text-gray-400">No pending approvals.</p>'}
+                    </div>
+                </div>
+                 <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-4">Recent Ratings (for Management)</h3>
+                     <div class="space-y-3">
+                     ${this.state.hostels.flatMap(h => h.reviews.map(r => ({...r, hostelName: h.name, hostelId: h.id}))).slice(0, 5).map(r => `
+                         <div class="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg">
+                                <div class="text-gray-300">
+                                    <p>"${r.text}" (${r.rating} stars for ${r.hostelName})</p>
+                                </div>
+                                <button onclick="app.removeReview(${r.hostelId}, ${r.id})" class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm flex-shrink-0">Remove</button>
+                         </div>
+                     `).join('')}
+                     ${this.state.hostels.flatMap(h => h.reviews).length === 0 ? '<p class="text-gray-400">No ratings submitted yet.</p>' : ''}
+                     </div>
+                 </div>
+            `;
+        },
+
+        // E V E N T  H A N D L E R S  &  L O G I C
+        addEventListeners() {
+            const menuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const openIcon = document.getElementById('mobile-menu-icon-open');
+            const closeIcon = document.getElementById('mobile-menu-icon-close');
+
+            menuButton.addEventListener('click', () => { 
+                mobileMenu.classList.toggle('hidden');
+                openIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            });
+            
+            // This needs to be delegated since the form is rendered dynamically
+            document.body.addEventListener('submit', (e) => {
+                 if (e.target.id === 'add-hostel-form') {
+                    e.preventDefault();
+                    this.addHostel();
+                }
+            });
+        },
+        
+        navigateTo(view, data = null) {
+            if (view === 'home') view = 'welcome'; // Reroute 'home' to 'welcome'
+            
+            // Handle content injection for non-static views before rendering
+            if (view === 'login') {
+                 // Inject the HTML content only when navigating to the login view
+                document.getElementById('login-view').innerHTML = this.getLoginViewHtml();
+            } else if (view === 'signup') {
+                 // Inject the HTML content only when navigating to the signup view
+                document.getElementById('signup-view').innerHTML = this.getSignupViewHtml();
+            } else if (view === 'details' && data) {
+                this.renderDetails(data);
+            }
+            
+            this.state.currentView = view;
+            this.render();
+            window.scrollTo(0, 0);
+            
+            // Close mobile menu on navigation
+            document.getElementById('mobile-menu').classList.add('hidden');
+            document.getElementById('mobile-menu-icon-open').classList.remove('hidden');
+            document.getElementById('mobile-menu-icon-close').classList.add('hidden');
+        },
+        
+        // A1, H1, U1: Login
+        login() {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            const user = this.state.users.find(u => u.email === email && u.password === pass);
+            
+            errorEl.textContent = '';
+            if (user) {
+                this.state.currentUser = {...user, history: []}; // Add history array for U12/U13
+                localStorage.setItem('currentUser', JSON.stringify(this.state.currentUser));
+                this.showToast(`Logged in successfully as ${user.name}!`, 'success');
+                this.navigateTo('welcome');
+            } else { errorEl.textContent = 'Invalid email or password.'; }
+        },
+        
+        // New function: Register New User/Owner
+        register() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const pass = document.getElementById('signup-password').value;
+            const role = document.getElementById('signup-role').value;
+            const errorEl = document.getElementById('signup-error');
+
+            errorEl.textContent = '';
+            
+            if (this.state.users.some(u => u.email === email)) {
+                errorEl.textContent = 'An account with this email already exists.';
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now(),
+                name: name,
+                email: email,
+                password: pass,
+                role: role
+            };
+
+            this.state.users.push(newUser);
+            this.showToast(`Account created for ${name} (${role})! Please sign in.`, 'success');
+            this.navigateTo('login');
+        },
+        
+        logout() {
+            this.state.currentUser = null;
+            localStorage.removeItem('currentUser');
+            this.showToast('Logged out successfully.', 'success');
+            this.navigateTo('welcome');
+        },
+        
+        // U11: View Hostel Details
+        viewDetails(hostelId) {
+            const hostel = this.state.hostels.find(h => h.id === hostelId);
+            if (hostel) {
+                hostel.views++; // This is H4, but not displayed. Still good to track.
+                this.navigateTo('details', hostel);
+            }
+        },
+
+        // U12: Review Hostel
+        submitReview(hostelId) {
+            const rating = document.getElementById('review-rating').value;
+            const text = document.getElementById('review-text').value;
+            if(!rating || !text) { this.showToast('Please provide a rating and a comment.', 'error'); return; }
+            const hostel = this.state.hostels.find(h => h.id === hostelId);
+            const review = { id: Date.now(), userId: this.state.currentUser.id, rating: parseInt(rating), text: text };
+            hostel.reviews.push(review);
+            
+            this.state.currentUser.history.push({ type: 'review', hostelId: hostelId, text: text, rating: parseInt(rating), date: new Date().toISOString() });
+            localStorage.setItem('currentUser', JSON.stringify(this.state.currentUser));
+            
+            this.showToast('Thank you for your review!', 'success');
+            this.renderDetails(hostel);
+        },
+
+        // U13: Ask Question on Hostel Page
+        submitQuestion(hostelId) {
+            const text = document.getElementById('question-text').value;
+            if(!text) { this.showToast('Please enter a question.', 'error'); return; }
+            const hostel = this.state.hostels.find(h => h.id === hostelId);
+            const question = { id: Date.now(), userId: this.state.currentUser.id, text: text, answer: null };
+            hostel.questions.push(question);
+            
+             this.state.currentUser.history.push({ type: 'question', hostelId: hostelId, text: text, date: new Date().toISOString() });
+            localStorage.setItem('currentUser', JSON.stringify(this.state.currentUser));
+
+            this.showToast('Your question has been submitted.', 'success');
+            document.getElementById('question-text').value = '';
+            this.renderDetails(hostel);
+            this.switchTab('questions', hostelId);
+        },
+        
+        // H3: Answer User Questions
+        submitAnswer(hostelId, questionId) {
+            const answerText = document.getElementById(`answer-text-${questionId}`).value;
+            if (!answerText) { this.showToast('Please enter an answer.', 'error'); return; }
+            const hostel = this.state.hostels.find(h => h.id === hostelId);
+            const question = hostel.questions.find(q => q.id === questionId);
+            question.answer = answerText;
+            this.showToast('Answer submitted!', 'success');
+            this.renderOwnerDashboard();
+        },
+        
+        // A2: Approve Hostel Listings
+        approveHostel(hostelId) {
+            const hostel = this.state.hostels.find(h => h.id === hostelId);
+            hostel.status = 'approved';
+            this.showToast(`${hostel.name} has been approved.`, 'success');
+            this.renderAdminDashboard();
+        },
+
+        // H2: Manage Hostel Listings (Delete) / A2 (Reject)
+        removeHostel(hostelId, isOwner = false) {
+             const index = this.state.hostels.findIndex(h => h.id === hostelId);
+             if (index > -1) {
+                 const hostel = this.state.hostels[index];
+                 if(isOwner && hostel.ownerId !== this.state.currentUser.id) {
+                     this.showToast('You can only delete your own hostels.', 'error');
+                     return;
+                 }
+                 const action = isOwner ? 'deleted' : 'rejected and removed';
+                 this.state.hostels.splice(index, 1);
+                 this.showToast(`${hostel.name} has been ${action}.`, 'success');
+                 
+                 if(isOwner) this.renderOwnerDashboard();
+                 else this.renderAdminDashboard();
+             }
+        },
+        
+        // A3: Manage Ratings
+        removeReview(hostelId, reviewId) {
+            const hostel = this.state.hostels.find(h => h.id === hostelId);
+            const index = hostel.reviews.findIndex(r => r.id === reviewId);
+            if(index > -1) {
+                hostel.reviews.splice(index, 1);
+                this.showToast('Review removed.', 'success');
+                if(this.state.currentView === 'details') this.renderDetails(hostel);
+                if(this.state.currentView === 'admin-dashboard') this.renderAdminDashboard();
+            }
+        },
+        
+        switchTab(tabName, hostelId) {
+            document.querySelectorAll('#details-view nav button').forEach(btn => {
+                btn.classList.remove('border-slate-500', 'text-slate-300');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+            document.querySelectorAll('#details-view .py-6').forEach(content => content.style.display = 'none');
+            
+            document.getElementById(`tab-${tabName}`).classList.add('border-slate-500', 'text-slate-300');
+            document.getElementById(`tab-content-${tabName}`).style.display = 'block';
+        },
+        
+        // UI Helpers
+        showAddHostelModal() {
+            const modalHtml = `<div class="modal-backdrop fixed inset-0 flex items-center justify-center p-4" onclick="app.closeModal()"><div class="modal bg-gray-800 rounded-lg shadow-xl w-full max-w-lg p-6 border border-gray-700" onclick="event.stopPropagation()"><h3 class="text-2xl font-bold text-white mb-4">List a New Hostel</h3><form id="add-hostel-form" class="space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-300">Hostel Name</label><input type="text" id="new-hostel-name" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md" required></div><div><label class="block text-sm font-medium text-gray-300">Area</label><input type="text" id="new-hostel-area" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md" required></div></div><div><label class="block text-sm font-medium text-gray-300">Monthly Rent (PKR)</label><input type="number" id="new-hostel-rent" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md" required></div><div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-300">Gender</label><select id="new-hostel-gender" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"><option>Male</option><option>Female</option></select></div><div><label class="block text-sm font-medium text-gray-300">Profession</label><select id="new-hostel-profession" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"><option>Student</option><option>Professional</option></select></div></div><div><label class="block text-sm font-medium text-gray-300">Description</label><textarea id="new-hostel-desc" rows="3" class="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md" required></textarea></div><div class="flex justify-end space-x-2 mt-6"><button type="button" onclick="app.closeModal()" class="px-4 py-2 bg-gray-600 text-gray-200 rounded-lg hover:bg-gray-500">Cancel</button><button type="submit" class="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">Submit for Approval</button></div></form></div></div>`;
+            document.getElementById('modal-container').innerHTML = modalHtml;
+            document.getElementById('modal-container').classList.remove('hidden');
+        },
+
+        // H2: Manage Hostel Listings (Add)
+        addHostel() {
+            const name = document.getElementById('new-hostel-name').value;
+            const newHostel = {
+                id: Date.now(),
+                name: name,
+                area: document.getElementById('new-hostel-area').value,
+                rent: parseInt(document.getElementById('new-hostel-rent').value),
+                gender: document.getElementById('new-hostel-gender').value,
+                profession: document.getElementById('new-hostel-profession').value,
+                image: `https://placehold.co/600x400/334155/f1f5f9?text=${name.replace(/ /g, '+')}`,
+                description: document.getElementById('new-hostel-desc').value,
+                amenities: ['Wi-Fi', 'Laundry', 'Security'], // Default amenities
+                ownerId: this.state.currentUser.id,
+                status: 'pending',
+                views: 0,
+                shortlists: 0,
+                reviews: [],
+                questions: [],
+            };
+            this.state.hostels.push(newHostel);
+            this.closeModal();
+            this.showToast('Hostel submitted for admin approval!', 'success');
+            this.renderOwnerDashboard();
+        },
+
+        closeModal() {
+            const modalContainer = document.getElementById('modal-container');
+            modalContainer.classList.add('hidden');
+            modalContainer.innerHTML = '';
+        },
+        
+        showToast(message, type = 'info') {
+            const colors = { info: 'bg-blue-600', success: 'bg-green-600', error: 'bg-red-600' };
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-3 rounded-lg text-white shadow-lg fade-in ${colors[type]}`;
+            toast.textContent = message;
+            document.getElementById('toast-container').appendChild(toast);
+            setTimeout(() => { 
+                toast.style.opacity = 0;
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        },
+        
+        hoverStars(value) {
+            const stars = document.querySelectorAll('#review-stars i');
+            const rating = document.getElementById('review-rating').value;
+            stars.forEach((star, index) => { 
+                star.classList.toggle('text-yellow-400', index < value); 
+                star.classList.toggle('text-gray-500', index >= value); 
+            });
+        },
+        
+        resetStars() {
+            const rating = document.getElementById('review-rating').value || 0;
+            this.hoverStars(rating);
+        },
+        
+        selectStars(value) {
+            document.getElementById('review-rating').value = value;
+            this.resetStars();
+        },
+
+
+        // M O C K   D A T A
+        generateMockData() {
+            this.state.users = [
+                { id: 1, name: 'Ali Raza', email: 'user@test.com', password: 'password', role: 'user'},
+                { id: 2, name: 'Kamran Khan', email: 'owner@test.com', password: 'password', role: 'owner' },
+                { id: 3, name: 'Saba Kanwal', email: 'admin@test.com', password: 'password', role: 'admin' },
+                { id: 4, name: 'Fatima', email: 'user2@test.com', password: 'password', role: 'user'}
+            ];
+
+            this.state.hostels = [
+                {
+                    id: 1, name: 'G-10 Boys Hostel', area: 'G-10', rent: 15000, gender: 'Male', profession: 'Student', image: 'https://placehold.co/600x400/4f46e5/ffffff?text=Modern+Hostel',
+                    description: 'A modern and clean hostel perfect for students studying at nearby universities. Features high-speed internet, a dedicated study area, 24/7 security, and an in-house mess providing three meals a day. Rooms are available in 2 and 3-seater configurations.',
+                    amenities: ['Wi-Fi', 'Laundry', 'Mess', 'Parking', 'Security', 'Study Area'],
+                    ownerId: 2, status: 'approved', views: 250, shortlists: 45,
+                    reviews: [ { id: 201, userId: 1, rating: 5, text: 'Great place to live! Very clean and the management is cooperative.' }, { id: 202, userId: 4, rating: 4, text: 'Good facilities, but the mess food could be better.' } ],
+                    questions: [ { id: 101, userId: 1, text: 'Is there a generator for backup power?', answer: 'Yes, we have a 24/7 generator backup for all rooms and common areas.' } ],
+                },
+                {
+                    id: 2, name: 'Blue Area Professionals Inn', area: 'Blue Area', rent: 25000, gender: 'Male', profession: 'Professional', image: 'https://placehold.co/600x400/0e7490/ffffff?text=City+View+Inn',
+                    description: 'Executive accommodation for job holders in the heart of the city. Close to major corporate offices with premium facilities including AC rooms, daily housekeeping, and an attached cafe. Ideal for professionals seeking comfort and convenience.',
+                    amenities: ['Wi-Fi', 'AC Rooms', 'Laundry', 'Mess', 'Parking', 'Security', 'Housekeeping'],
+                    ownerId: 2, status: 'approved', views: 180, shortlists: 30,
+                    reviews: [], questions: [],
+                },
+                {
+                    id: 3, name: 'F-11 Girls Dormitory', area: 'F-11', rent: 18000, gender: 'Female', profession: 'Student', image: 'https://placehold.co/600x400/be185d/ffffff?text=Girls+Dorm',
+                    description: 'A very safe and secure environment for female students. Located in a peaceful residential area with easy access to markets and transport. Features a female warden, CCTV surveillance, and a comfortable common room with a TV.',
+                    amenities: ['Wi-Fi', 'Laundry', 'Mess', 'Security', 'Common Room', 'CCTV'],
+                    ownerId: 2, status: 'approved', views: 310, shortlists: 60,
+                    reviews: [ { id: 203, userId: 4, rating: 5, text: 'Very safe and comfortable. The warden is very helpful.' } ],
+                    questions: [ { id: 102, userId: 1, text: 'What are the curfew timings?', answer: 'The in-time is 10 PM sharp for all residents.' } ],
+                },
+                {
+                    id: 4, name: 'I-8 Executive Lodges', area: 'I-8', rent: 22000, gender: 'Male', profession: 'Professional', image: 'https://placehold.co/600x400/15803d/ffffff?text=Executive+Stay',
+                    description: 'Comfortable living for professionals with attached baths and kitchenettes. Quiet and conducive for work-from-home setups. Each room is well-furnished and spacious.',
+                    amenities: ['Wi-Fi', 'AC Rooms', 'Parking', 'Security', 'Kitchenette'],
+                    ownerId: 2, status: 'pending', views: 0, shortlists: 0,
+                    reviews: [], questions: [],
+                },
+                 {
+                    id: 5, name: 'E-11 University Hostel', area: 'E-11', rent: 12000, gender: 'Male', profession: 'Student', image: 'https://placehold.co/600x400/a16207/ffffff?text=Campus+Living',
+                    description: 'An affordable and budget-friendly option for students. Located near major universities, making the daily commute easy. Provides all basic necessities at a very reasonable price.',
+                    amenities: ['Wi-Fi', 'Mess', 'Parking', 'Laundry'],
+                    ownerId: 2, status: 'approved', views: 450, shortlists: 85,
+                    reviews: [ { id: 204, userId: 1, rating: 4, text: 'Value for money. Rooms are basic but clean.' } ],
+                    questions: [ { id: 103, userId: 4, text: 'Is there a laundry service?', answer: 'Yes, laundry is available at an additional cost.' }, { id: 104, userId: 1, text: 'Do you provide transport to university?', answer: null } ],
+                }
+            ];
+        }
+    };
+    
+    // Start the app
+    app.init();
+
+    </script>
+</body>
+</html>
