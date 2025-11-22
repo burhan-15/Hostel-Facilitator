@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import HostelCard from "../Components/hostelcard";
-// import { hostels } from "../data/hostelMock"; // remove mock import
 import { getHostels } from "../services/hostelService";
 
 export default function Hostels() {
@@ -11,12 +10,6 @@ export default function Hostels() {
     const fetchData = async () => {
       try {
         const data = await getHostels();
-        // Debug: Check if hostels have _id
-        if (data.length > 0) {
-          console.log("Sample hostel data:", data[0]);
-          console.log("Hostel _id:", data[0]._id);
-          console.log("Hostel id:", data[0].id);
-        }
         setHostels(data);
       } catch (error) {
         console.error("Error fetching hostels:", error);

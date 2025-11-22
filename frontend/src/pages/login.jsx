@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../Components/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
-import API from "../api";
 
 export default function Login() {
   const { login } = useAuth();
@@ -12,33 +11,6 @@ export default function Login() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Debug: Fetch and display all users on component mount
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await API.get("/auth/debug/users");
-        if (response.data.success) {
-          console.log("=== ALL USERS IN DATABASE ===");
-          console.log("Total users:", response.data.count);
-          console.table(response.data.users);
-          console.log("Users array:", response.data.users);
-          response.data.users.forEach((user, index) => {
-            console.log(`User ${index + 1}:`, {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              role: user.role
-            });
-          });
-          console.log("=============================");
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        console.error("Error response:", error.response);
-      }
-    };
-    fetchUsers();
-  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent form submission
@@ -48,23 +20,15 @@ export default function Login() {
       setError("Please enter both email and password");
       return;
     }
-
-    console.log("=== LOGIN ATTEMPT ===");
-    console.log("Email:", email);
-    console.log("Password length:", password.length);
     
     const res = await login(email, password);
     
-    console.log("Login result:", res);
-
     if (!res.success) {
       console.error("Login failed:", res.message);
       setError(res.message);
       return;
     }
 
-    console.log("Login successful! User:", res.user);
-    console.log("Redirecting to:", res.user.role === "admin" ? "/admin" : res.user.role === "owner" ? "/owner" : "/dashboard");
 
     // redirect based on role
     if (res.user.role === "admin") navigate("/admin");
