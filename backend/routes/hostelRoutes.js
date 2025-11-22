@@ -15,6 +15,9 @@ import { authenticate, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
 
+// Admin all hostels
+router.get("/admin", authenticate, authorize("admin"), getAllHostels);
+
 // Public routes (no auth required)
 router.get("/", getAllHostels);
 router.get("/:id", getHostelById);

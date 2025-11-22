@@ -12,9 +12,9 @@ export const getAllHostels = async (req, res) => {
     // If user is not admin, only show approved hostels
     if (req.user?.role !== "admin") {
       filter.status = "approved";
-    } else if (status) {
-      filter.status = status;
     }
+    
+
 
     if (area) filter.area = area;
     if (gender) filter.gender = gender;

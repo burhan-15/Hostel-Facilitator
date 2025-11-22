@@ -16,9 +16,6 @@ export default function OwnerDashboard() {
   const [editHostel, setEditHostel] = useState(null);
 
   // Only owners allowed
-  if (!currentUser || currentUser.role !== "owner") {
-    return <Navigate to="/login" replace />;
-  }
 
   useEffect(() => {
     const fetchHostels = async () => {
@@ -33,6 +30,10 @@ export default function OwnerDashboard() {
     };
     fetchHostels();
   }, []);
+
+  if (!currentUser || currentUser.role !== "owner") {
+    return <Navigate to="/login" replace />;
+  }
 
   // Extract unanswered questions
   const unansweredQuestions = hostels.flatMap((h) =>

@@ -10,6 +10,16 @@ export const getHostels = async () => {
   }
 };
 
+export const getAllHostels = async () => {
+  try {
+    const res = await API.get("/hostels/admin");
+    return res.data.hostels || [];
+  } catch (error) {
+    console.error("Error fetching hostels:", error);
+    return [];
+  }
+};
+
 export const getHostelById = async (id) => {
   try {
     const res = await API.get(`/hostels/${id}`);
