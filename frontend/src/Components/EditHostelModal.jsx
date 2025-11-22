@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { updateHostel as updateHostelAPI } from "../services/hostelService";
 
 export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
 
@@ -34,22 +35,33 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
     );
   };
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    const updated = {
-      ...hostel,
-      name,
-      area,
-      rent,
-      gender,
-      profession,
-      description: desc,
-      amenities,
-    };
+    try {
+      const hostelId = hostel._id || hostel.id;
+      const updated = {
+        name,
+        area,
+        rent,
+        gender,
+        profession,
+        description: desc,
+        amenities,
+      };
 
-    updateHostel(updated);
-    closeModal();
+      await updateHostelAPI(hostelId, updated);
+      updateHostel(); // Refresh the list
+      closeModal();
+    } catch (error) {
+      console.error("Error updating hostel:", error);
+      alert(error.response?.data?.message || "Failed to update hostel");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -198,9 +210,10 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
 
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              Save Changes
+              {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
 

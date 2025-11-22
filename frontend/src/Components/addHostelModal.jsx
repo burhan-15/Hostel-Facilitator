@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createHostel } from "../services/hostelService";
 
 export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
   // Form state
@@ -34,29 +35,33 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
     );
   };
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    const newHostel = {
-      id: Date.now(),
-      name,
-      area,
-      rent: Number(rent),
-      gender,
-      profession,
-      description: desc,
-      image: "https://placehold.co/600x400/4b5563/ffffff?text=New+Hostel",
-      amenities: selectedAmenities,
-      ownerId: currentUser.id,
-      status: "pending",
-      reviews: [],
-      questions: [],
-      views: 0,
-      shortlists: 0,
-    };
+    try {
+      const hostelData = {
+        name,
+        area,
+        rent: Number(rent),
+        gender,
+        profession,
+        description: desc,
+        image: "https://placehold.co/600x400/4b5563/ffffff?text=New+Hostel",
+        amenities: selectedAmenities,
+      };
 
-    addHostel(newHostel);
-    closeModal();
+      await createHostel(hostelData);
+      addHostel(); // Refresh the list
+      closeModal();
+    } catch (error) {
+      console.error("Error creating hostel:", error);
+      alert(error.response?.data?.message || "Failed to create hostel");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -198,9 +203,10 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
 
             <button
               type="submit"
-              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
+              disabled={loading}
+              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
             >
-              Submit for Approval
+              {loading ? "Submitting..." : "Submit for Approval"}
             </button>
           </div>
         </form>

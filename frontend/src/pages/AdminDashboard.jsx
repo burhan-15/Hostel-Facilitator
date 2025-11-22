@@ -1,23 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
-
-// Mock data imports
-import { hostels as hostelData } from "../data/hostelMock";
-import { users } from "../data/users";
+import { getHostels, approveHostel, rejectHostel, deleteReview } from "../services/hostelService";
+import API from "../api";
 
 export default function AdminDashboard() {
   const { currentUser } = useAuth();
+  const [hostels, setHostels] = useState([]);
+  const [users, setUsers] = useState({ users: 0, owners: 0 });
+  const [loading, setLoading] = useState(true);
 
-  // Only admins allowed
+  if (!currentUser || currentUser.role !== "admin") {
+    return <Navigate to="/login" replace />;
+  }
 
-  // Runtime mutable data
-  const [hostels, setHostels] = useState(hostelData);
-//   const [users, setUsers] = useState(usersData);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch hostels with status filter for admin
+        const hostelsData = await getHostels();
+        setHostels(hostelsData);
 
-    if (!currentUser || currentUser.role !== "admin") {
-        return <Navigate to="/login" replace />;
-    }
+        // Fetch user stats (you may need to create this endpoint)
+        // For now, we'll just set placeholder values
+        // You can add a /api/users/stats endpoint later
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Pending approvals
   const pendingHostels = hostels.filter((h) => h.status === "pending");
@@ -25,38 +39,59 @@ export default function AdminDashboard() {
   // Recent 5 reviews
   const recentReviews = hostels
     .flatMap((h) =>
-      h.reviews.map((r) => ({
+      (h.reviews || []).map((r) => ({
         ...r,
         hostelName: h.name,
-        hostelId: h.id,
+        hostelId: h._id || h.id,
+        reviewId: r._id || r.id,
       }))
     )
     .slice(0, 5);
 
   // Approve hostel
-  const approveHostel = (id) => {
-    setHostels((prev) =>
-      prev.map((h) =>
-        h.id === id ? { ...h, status: "approved" } : h
-      )
-    );
+  const handleApproveHostel = async (id) => {
+    try {
+      await approveHostel(id);
+      // Refresh hostels
+      const data = await getHostels();
+      setHostels(data);
+    } catch (error) {
+      console.error("Error approving hostel:", error);
+      alert(error.response?.data?.message || "Failed to approve hostel");
+    }
   };
 
   // Reject / delete hostel
-  const removeHostel = (id) => {
-    setHostels((prev) => prev.filter((h) => h.id !== id));
+  const handleRemoveHostel = async (id) => {
+    if (!window.confirm("Are you sure you want to reject this hostel?")) return;
+    
+    try {
+      await rejectHostel(id);
+      // Refresh hostels
+      const data = await getHostels();
+      setHostels(data);
+    } catch (error) {
+      console.error("Error rejecting hostel:", error);
+      alert(error.response?.data?.message || "Failed to reject hostel");
+    }
   };
 
   // Remove a review
-  const removeReview = (hostelId, reviewId) => {
-    setHostels((prev) =>
-      prev.map((h) =>
-        h.id === hostelId
-          ? { ...h, reviews: h.reviews.filter((r) => r.id !== reviewId) }
-          : h
-      )
-    );
+  const handleRemoveReview = async (hostelId, reviewId) => {
+    try {
+      await deleteReview(hostelId, reviewId);
+      // Refresh hostels
+      const data = await getHostels();
+      setHostels(data);
+    } catch (error) {
+      console.error("Error removing review:", error);
+      alert(error.response?.data?.message || "Failed to remove review");
+    }
   };
+
+  if (loading) {
+    return <p className="text-white text-center mt-10">Loading...</p>;
+  }
 
   return (
     <div className="bg-gray-900 min-h-screen text-white p-6">
@@ -70,12 +105,12 @@ export default function AdminDashboard() {
           />
 
           <StatCard
-            value={users.filter((u) => u.role === "user").length}
+            value={users.users}
             label="Total Users"
           />
 
           <StatCard
-            value={users.filter((u) => u.role === "owner").length}
+            value={users.owners}
             label="Total Owners"
           />
         </div>
@@ -90,38 +125,45 @@ export default function AdminDashboard() {
             {pendingHostels.length === 0 ? (
               <p className="text-gray-400">No pending approvals.</p>
             ) : (
-              pendingHostels.map((h) => (
-                <div
-                  key={h.id}
-                  className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg"
-                >
-                  <div>
-                    <p className="font-semibold text-white">
-                      {h.name}
-                      <span className="text-sm text-gray-400">
-                        {" "}
-                        by Owner #{h.ownerId}
-                      </span>
-                    </p>
-                  </div>
+              pendingHostels.map((h) => {
+                const hostelId = h._id || h.id;
+                const ownerName = typeof h.ownerId === 'object' 
+                  ? (h.ownerId.name || `Owner #${h.ownerId._id || h.ownerId.id}`)
+                  : `Owner #${h.ownerId}`;
+                
+                return (
+                  <div
+                    key={hostelId}
+                    className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg"
+                  >
+                    <div>
+                      <p className="font-semibold text-white">
+                        {h.name}
+                        <span className="text-sm text-gray-400">
+                          {" "}
+                          by {ownerName}
+                        </span>
+                      </p>
+                    </div>
 
-                  <div>
-                    <button
-                      onClick={() => approveHostel(h.id)}
-                      className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
-                    >
-                      Approve
-                    </button>
+                    <div>
+                      <button
+                        onClick={() => handleApproveHostel(hostelId)}
+                        className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                      >
+                        Approve
+                      </button>
 
-                    <button
-                      onClick={() => removeHostel(h.id)}
-                      className="ml-2 px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
-                    >
-                      Reject
-                    </button>
+                      <button
+                        onClick={() => handleRemoveHostel(hostelId)}
+                        className="ml-2 px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -138,7 +180,7 @@ export default function AdminDashboard() {
             ) : (
               recentReviews.map((r) => (
                 <div
-                  key={r.id}
+                  key={r.reviewId}
                   className="flex justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg"
                 >
                   <div className="text-gray-300">
@@ -148,7 +190,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <button
-                    onClick={() => removeReview(r.hostelId, r.id)}
+                    onClick={() => handleRemoveReview(r.hostelId, r.reviewId)}
                     className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
                   >
                     Remove

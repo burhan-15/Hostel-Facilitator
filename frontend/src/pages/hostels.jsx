@@ -1,8 +1,37 @@
+import { useEffect, useState } from "react";
 import HostelCard from "../Components/hostelcard";
-import { hostels } from "../data/hostelMock";
+// import { hostels } from "../data/hostelMock"; // remove mock import
+import { getHostels } from "../services/hostelService";
 
 export default function Hostels() {
+  const [hostels, setHostels] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getHostels();
+        // Debug: Check if hostels have _id
+        if (data.length > 0) {
+          console.log("Sample hostel data:", data[0]);
+          console.log("Hostel _id:", data[0]._id);
+          console.log("Hostel id:", data[0].id);
+        }
+        setHostels(data);
+      } catch (error) {
+        console.error("Error fetching hostels:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const approvedHostels = hostels.filter((h) => h.status === "approved");
+
+  if (loading) {
+    return <p className="text-white text-center mt-10">Loading hostels...</p>;
+  }
 
   return (
     <div className="bg-gray-900 min-h-screen p-8">
@@ -15,7 +44,7 @@ export default function Hostels() {
       ) : (
         <div className="grid md:grid-cols-4 gap-6">
           {approvedHostels.map((hostel) => (
-            <HostelCard key={hostel.id} hostel={hostel} />
+            <HostelCard key={hostel._id || hostel.id} hostel={hostel} />
           ))}
         </div>
       )}

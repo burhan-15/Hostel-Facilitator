@@ -12,8 +12,21 @@ export default function Signup() {
 
   const [error, setError] = useState("");
 
-  const handleSignup = () => {
-    const res = signup(name, email, password);
+  const handleSignup = async (e) => {
+    e?.preventDefault(); // Prevent form submission if called from form
+    setError("");
+    
+    if (!name || !email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters");
+      return;
+    }
+
+    const res = await signup(name, email, password);
 
     if (!res.success) {
       setError(res.message);
@@ -32,35 +45,42 @@ export default function Signup() {
 
         {error && <p className="text-red-400 text-sm mb-3 text-center">{error}</p>}
 
-        <div className="space-y-4">
+        <form onSubmit={handleSignup} className="space-y-4">
           <input
             type="text"
             className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600"
             placeholder="Full Name"
+            value={name}
             onChange={(e) => setName(e.target.value)}
+            required
           />
 
           <input
             type="email"
             className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600"
             placeholder="Email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
 
           <input
             type="password"
             className="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600"
-            placeholder="Password"
+            placeholder="Password (min 6 characters)"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={6}
           />
 
           <button
-            onClick={handleSignup}
+            type="submit"
             className="w-full bg-slate-700 hover:bg-slate-600 transition p-3 rounded-lg text-white"
           >
             Create Account
           </button>
-        </div>
+        </form>
 
         <p className="text-gray-400 text-sm text-center mt-4">
           Already have an account?{" "}

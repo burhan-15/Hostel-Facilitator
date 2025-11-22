@@ -1,19 +1,74 @@
 import { useParams } from "react-router-dom";
-import { hostels } from "../data/hostelMock";
-import { users } from "../data/users";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../Components/AuthContext";
+import { getHostelById, addQuestion, answerQuestion } from "../services/hostelService";
+import { addReview, deleteReview, getReviews } from "../services/hostelService";
 
 export default function HostelDetail() {
   const { id } = useParams();
-  const hostel = hostels.find((h) => h.id === Number(id));
   const { currentUser } = useAuth();
 
+  const [hostel, setHostel] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState("reviews");
-  const [reviews, setReviews] = useState(hostel.reviews);
-  const [questions, setQuestions] = useState(hostel.questions);
+  const [reviews, setReviews] = useState([]);
+  const [questions, setQuestions] = useState([]);
 
-  if (!hostel) return <p className="text-white p-6">Hostel not found</p>;
+  useEffect(() => {
+    const fetchHostel = async () => {
+      try {
+        if (!id || id === "undefined") {
+          console.error("Invalid hostel ID:", id);
+          setLoading(false);
+          return;
+        }
+        console.log("Fetching hostel with ID:", id);
+        const hostelData = await getHostelById(id);
+        if (hostelData) {
+          console.log("Hostel data received:", hostelData);
+          console.log("Hostel _id:", hostelData._id);
+          setHostel(hostelData);
+          setReviews(hostelData.reviews || []);
+          setQuestions(hostelData.questions || []);
+        } else {
+          console.error("Hostel data is null");
+        }
+      } catch (error) {
+        console.error("Error fetching hostel:", error);
+        console.error("Error response:", error.response);
+        // Show error message to user
+        if (error.response?.status === 404) {
+          // Hostel not found - will be handled by the "if (!hostel)" check
+        } else {
+          alert("Failed to load hostel details. Please try again.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHostel();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+        <p className="text-white text-xl">Loading hostel details...</p>
+      </div>
+    );
+  }
+  
+  if (!hostel) {
+    return (
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-white text-xl mb-4">Hostel not found</p>
+          <a href="/hostels" className="text-slate-300 hover:text-white underline">
+            Go back to hostels
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   const avgRating =
     reviews.length > 0
@@ -21,30 +76,48 @@ export default function HostelDetail() {
       : "N/A";
 
   const userHasReviewed =
-    currentUser && reviews.some((r) => r.userId === currentUser.id);
+    currentUser && reviews.some((r) => {
+      const userId = typeof r.userId === 'object' ? String(r.userId._id || r.userId.id) : String(r.userId);
+      return userId === String(currentUser.id);
+    });
 
-  const addReview = (rating, text) => {
-    const newReview = {
-      id: Date.now(),
-      userId: currentUser.id,
-      rating,
-      text,
-    };
-    setReviews([newReview, ...reviews]);
+  const handleAddReview = async (rating, text) => {
+    try {
+      const result = await addReview(id, rating, text);
+      if (result.success) {
+        setReviews(result.hostel.reviews || []);
+        setHostel(result.hostel);
+      }
+    } catch (error) {
+      console.error("Error adding review:", error);
+      alert(error.response?.data?.message || "Failed to add review");
+    }
   };
 
-  const addQuestion = (text) => {
-    const newQ = {
-      id: Date.now(),
-      userId: currentUser.id,
-      text,
-      answer: null,
-    };
-    setQuestions([newQ, ...questions]);
+  const handleAddQuestion = async (text) => {
+    try {
+      const result = await addQuestion(id, text);
+      if (result.success) {
+        setQuestions(result.hostel.questions || []);
+        setHostel(result.hostel);
+      }
+    } catch (error) {
+      console.error("Error adding question:", error);
+      alert(error.response?.data?.message || "Failed to add question");
+    }
   };
 
-  const removeReview = (reviewId) => {
-    setReviews(reviews.filter((r) => r.id !== reviewId));
+  const handleRemoveReview = async (reviewId) => {
+    try {
+      const result = await deleteReview(id, reviewId);
+      if (result.success) {
+        setReviews(reviews.filter((r) => r._id !== reviewId && r.id !== reviewId));
+        setHostel(result.hostel);
+      }
+    } catch (error) {
+      console.error("Error removing review:", error);
+      alert(error.response?.data?.message || "Failed to remove review");
+    }
   };
 
   return (
@@ -92,14 +165,18 @@ export default function HostelDetail() {
               <p className="text-gray-300 leading-relaxed mb-6">{hostel.description}</p>
 
               <h3 className="text-2xl font-semibold mb-4">Amenities</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-                {hostel.amenities.map((amenity, i) => (
-                  <div key={i} className="flex items-center text-gray-300">
-                    <span className="text-green-500 mr-2">✔</span>
-                    {amenity}
-                  </div>
-                ))}
-              </div>
+              {hostel.amenities && hostel.amenities.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+                  {hostel.amenities.map((amenity, i) => (
+                    <div key={i} className="flex items-center text-gray-300">
+                      <span className="text-green-500 mr-2">✔</span>
+                      {amenity}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-400 mb-6">No amenities listed.</p>
+              )}
             </div>
 
             {/* Hostel Information */}
@@ -157,18 +234,21 @@ export default function HostelDetail() {
 
                 {/* Review form */}
                 {currentUser?.role === "user" && !userHasReviewed && (
-                  <ReviewForm onSubmit={addReview} />
+                  <ReviewForm onSubmit={handleAddReview} />
                 )}
 
                 {/* Review list */}
                 <div className="space-y-4 mt-6">
                   {reviews.length > 0 ? (
                     reviews.map((review) => {
-                      const user = users.find((u) => u.id === review.userId);
+                      const userName = typeof review.userId === 'object' 
+                        ? (review.userId.name || "Anonymous")
+                        : "Anonymous";
+                      const reviewId = review._id || review.id;
 
                       return (
                         <div
-                          key={review.id}
+                          key={reviewId}
                           className="p-4 border border-gray-700 rounded-lg bg-gray-700"
                         >
                           <div className="flex justify-between items-center mb-1">
@@ -188,14 +268,14 @@ export default function HostelDetail() {
                                 ))}
                               </div>
                               <p className="ml-3 font-semibold text-white">
-                                {user ? user.name : "Anonymous"}
+                                {userName}
                               </p>
                             </div>
 
                             {/* Admin delete */}
                             {currentUser?.role === "admin" && (
                               <button
-                                onClick={() => removeReview(review.id)}
+                                onClick={() => handleRemoveReview(reviewId)}
                                 className="text-xs text-red-400 hover:text-red-300"
                               >
                                 Remove
@@ -222,25 +302,35 @@ export default function HostelDetail() {
 
                 {/* Ask question */}
                 {currentUser && currentUser.role === "user" && (
-                  <QuestionForm onSubmit={addQuestion} />
+                  <QuestionForm onSubmit={handleAddQuestion} />
                 )}
 
                 {/* Q&A list */}
                 <div className="space-y-4">
                   {questions.length > 0 ? (
                     questions.map((q) => {
-                      const user = users.find((u) => u.id === q.userId);
+                      const questionId = q._id || q.id;
+                      const userName = typeof q.userId === 'object' 
+                        ? (q.userId.name || "Anonymous")
+                        : "Anonymous";
+                      const isOwner = currentUser && (
+                        currentUser.role === "owner" || currentUser.role === "admin"
+                      ) && hostel.ownerId && (
+                        typeof hostel.ownerId === 'object' 
+                          ? String(hostel.ownerId._id || hostel.ownerId.id) === String(currentUser.id)
+                          : String(hostel.ownerId) === String(currentUser.id)
+                      );
 
                       return (
                         <div
-                          key={q.id}
+                          key={questionId}
                           className="p-4 border border-gray-700 rounded-lg bg-gray-700"
                         >
                           <p className="font-semibold text-white">
                             Q: {q.text}
                           </p>
                           <p className="text-sm text-gray-400 mb-2">
-                            Asked by {user?.name || "Anonymous"}
+                            Asked by {userName}
                           </p>
 
                           {q.answer ? (
@@ -252,6 +342,26 @@ export default function HostelDetail() {
                                 Answered by Hostel Owner
                               </p>
                             </div>
+                          ) : isOwner ? (
+                            <AnswerForm 
+                              hostelId={id} 
+                              questionId={questionId}
+                              onAnswer={(answer) => {
+                                const handleAnswer = async () => {
+                                  try {
+                                    const result = await answerQuestion(id, questionId, answer);
+                                    if (result.success) {
+                                      setQuestions(result.hostel.questions || []);
+                                      setHostel(result.hostel);
+                                    }
+                                  } catch (error) {
+                                    console.error("Error answering question:", error);
+                                    alert(error.response?.data?.message || "Failed to answer question");
+                                  }
+                                };
+                                handleAnswer();
+                              }}
+                            />
                           ) : (
                             <p className="mt-2 pl-4 text-sm text-gray-500 italic">
                               Awaiting answer from owner...
@@ -331,10 +441,42 @@ function QuestionForm({ onSubmit }) {
       />
 
       <button
-        onClick={() => onSubmit(text)}
+        onClick={() => {
+          if (text.trim()) {
+            onSubmit(text);
+            setText("");
+          }
+        }}
         className="mt-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
       >
         Submit Question
+      </button>
+    </div>
+  );
+}
+
+function AnswerForm({ hostelId, questionId, onAnswer }) {
+  const [answer, setAnswer] = useState("");
+
+  return (
+    <div className="mt-2">
+      <textarea
+        rows="2"
+        className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded-md"
+        placeholder="Type your answer here..."
+        value={answer}
+        onChange={(e) => setAnswer(e.target.value)}
+      />
+      <button
+        onClick={() => {
+          if (answer.trim()) {
+            onAnswer(answer);
+            setAnswer("");
+          }
+        }}
+        className="mt-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm"
+      >
+        Submit Answer
       </button>
     </div>
   );
