@@ -20,12 +20,12 @@ const hostelSchema = new mongoose.Schema(
     gender: {
       type: String,
       required: [true, "Gender is required"],
-      enum: ["Male", "Female", "Mixed"],
+      enum: ["Male", "Female"],
     },
     profession: {
       type: String,
       required: [true, "Profession is required"],
-      enum: ["Student", "Professional"],
+      enum: ["Student", "Professional", "Both"],
     },
     description: {
       type: String,

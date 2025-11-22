@@ -79,13 +79,8 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log("=== LOGIN REQUEST ===");
-    console.log("Email:", email);
-    console.log("Password provided:", password ? "Yes (length: " + password.length + ")" : "No");
-
     // Validate input
     if (!email || !password) {
-      console.log("Validation failed: Missing email or password");
       return res.status(400).json({ 
         success: false, 
         message: "Please provide email and password" 
@@ -93,36 +88,25 @@ export const login = async (req, res) => {
     }
 
     // Find user
-    console.log("Searching for user with email:", email);
     const user = await User.findOne({ email });
     if (!user) {
-      console.log("User not found with email:", email);
-      // List all users for debugging
-      const allUsers = await User.find({}).select("email role name");
-      console.log("Available users in database:", allUsers.map(u => ({ email: u.email, role: u.role, name: u.name })));
       return res.status(401).json({ 
         success: false, 
         message: "Invalid email or password" 
       });
     }
 
-    console.log("User found:", { id: user._id, email: user.email, role: user.role, name: user.name });
-    console.log("Stored password hash exists:", user.password ? "Yes" : "No");
 
     // Check password
-    console.log("Comparing password...");
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log("Password valid:", isPasswordValid);
     
     if (!isPasswordValid) {
-      console.log("Password comparison failed");
       return res.status(401).json({ 
         success: false, 
         message: "Invalid email or password" 
       });
     }
 
-    console.log("Password is valid, generating token...");
 
     // Check if JWT_SECRET is set
     if (!process.env.JWT_SECRET) {
@@ -140,8 +124,6 @@ export const login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // Return user data (without password)
-    console.log("Login successful! Returning token and user data");
     res.status(200).json({
       success: true,
       message: "Login successful",
@@ -153,7 +135,6 @@ export const login = async (req, res) => {
         role: user.role,
       },
     });
-    console.log("=== LOGIN SUCCESS ===");
   } catch (error) {
     console.error("=== LOGIN ERROR ===");
     console.error("Login error:", error);
@@ -199,7 +180,6 @@ export const getProfile = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({}).select("-password");
-    console.log("All users in database:", users.map(u => ({ email: u.email, role: u.role, name: u.name })));
     res.status(200).json({
       success: true,
       count: users.length,
