@@ -128,6 +128,7 @@ export default function OwnerDashboard() {
                     </p>
                     <p className="text-sm text-gray-400">{h.area}</p>
                     <p className="text-sm text-gray-400">Views: {h.views}</p>
+                    <p className="text-sm text-gray-400">Shortlists: {h.shortlists}</p>
                   </div>
 
                   <div className="flex items-center space-x-2">

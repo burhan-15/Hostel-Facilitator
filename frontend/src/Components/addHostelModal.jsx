@@ -21,6 +21,7 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
     "NUST",
     "FAST",
     "COMSATS",
+    "NUML",
     "Air University",
     "Bahria University",
     "Quaid-e-Azam University (QAU)",
@@ -35,6 +36,7 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
     "Islamabad Medical & Dental College (IMDC)"
   ];
 
+  
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [selectedUnis, setSelectedUnis] = useState([]);
 

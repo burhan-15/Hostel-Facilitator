@@ -16,6 +16,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
     "NUST",
     "FAST",
     "COMSATS",
+    "NUML",
     "Air University",
     "Bahria University",
     "Quaid-e-Azam University (QAU)",
