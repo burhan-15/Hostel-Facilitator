@@ -34,6 +34,18 @@ export default function Hostels() {
   const areaInputRef = useRef(null);
   const areaSuggestionsRef = useRef(null);
 
+  // Nearby University filter states
+  const [availableUnis, setAvailableUnis] = useState([]);
+  const [selectedUnis, setSelectedUnis] = useState([]);
+  const [uniInput, setUniInput] = useState("");
+  const [uniSuggestions, setUniSuggestions] = useState([]);
+  const [showUniSuggestions, setShowUniSuggestions] = useState(false);
+  const [uniHighlightIndex, setUniHighlightIndex] = useState(-1);
+
+  const uniInputRef = useRef(null);
+  const uniSuggestionsRef = useRef(null);
+
+
   // LOAD HOSTELS INITIALLY
   useEffect(() => {
     (async () => {
@@ -49,6 +61,12 @@ export default function Hostels() {
             data.map((h) => h.area).filter((a) => typeof a === "string")
           ),
         ].sort();
+        
+        // Extract universities (all hostels have nearbyUniversities: [])
+        const allUnis = data.flatMap(h => h.nearbyUniversities || []);
+        const uniqueUnis = [...new Set(allUnis)].sort();
+        setAvailableUnis(uniqueUnis);
+
 
         setAvailableAreas(uniqueAreas);
       } catch (err) {
@@ -77,6 +95,15 @@ export default function Hostels() {
 
     if (profession) result = result.filter((h) => h.profession === profession);
 
+    // University filter
+    if (selectedUnis.length > 0) {
+      result = result.filter(
+        h =>
+          Array.isArray(h.nearbyUniversities) &&
+          h.nearbyUniversities.some(u => selectedUnis.includes(u))
+      );
+    }
+
     result = result.filter((h) => h.rent >= minRent && h.rent <= maxRent);
 
     if (minRating) {
@@ -92,6 +119,8 @@ export default function Hostels() {
     setAreaInput("");
     setProfession("");
     setMinRating("");
+    setSelectedUnis([]);
+    setUniInput("");
     setMinRent(0);
     setMaxRent(100000);
     setFilteredHostels(hostels);
@@ -203,6 +232,58 @@ export default function Hostels() {
   const removeArea = (value) => {
     setSelectedAreas((prev) => prev.filter((a) => a !== value));
   };
+
+  // UNIVERSITY TYPEAHEAD EFFECT
+  useEffect(() => {
+    const q = uniInput?.trim()?.toLowerCase() || "";
+
+    if (!q) {
+      setUniSuggestions([]);
+      setShowUniSuggestions(false);
+      return;
+    }
+
+    const matches = availableUnis.filter(
+      (u) => u.toLowerCase().includes(q) && !selectedUnis.includes(u)
+    );
+
+    setUniSuggestions(matches);
+    setShowUniSuggestions(true);
+  }, [uniInput, availableUnis, selectedUnis]);
+
+  const handleUniKeyDown = (e) => {
+    if (!showUniSuggestions) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setUniHighlightIndex((prev) =>
+        prev < uniSuggestions.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setUniHighlightIndex((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (uniHighlightIndex >= 0) {
+        selectUni(uniSuggestions[uniHighlightIndex]);
+      } else if (uniSuggestions.length > 0) {
+        selectUni(uniSuggestions[0]);
+      }
+    } else if (e.key === "Escape") {
+      setShowUniSuggestions(false);
+    }
+  };
+
+  const selectUni = (value) => {
+    setSelectedUnis((prev) => [...prev, value]);
+    setUniInput("");
+    setShowUniSuggestions(false);
+  };
+
+  const removeUni = (value) => {
+    setSelectedUnis((prev) => prev.filter((u) => u !== value));
+  };
+
 
   // WHICH HOSTELS TO SHOW?
   const shownHostels =
@@ -365,6 +446,65 @@ export default function Hostels() {
             )}
           </div>
 
+          {/* Nearby University Filter */}
+          <div className="relative">
+            <label className="text-gray-300">Nearby University</label>
+
+            <div
+              className="flex flex-wrap items-center gap-1 mt-2 p-2 bg-gray-700 rounded cursor-text"
+              onClick={() => uniInputRef.current.focus()}
+            >
+              {selectedUnis.map((uni) => (
+                <span
+                  key={uni}
+                  className="bg-indigo-600 text-white px-2 rounded-full flex items-center gap-1"
+                >
+                  {uni}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeUni(uni);
+                    }}
+                    className="text-white font-bold ml-1"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+
+              <input
+                ref={uniInputRef}
+                type="text"
+                value={uniInput}
+                onChange={(e) => {
+                  setUniInput(e.target.value || "");
+                  setUniHighlightIndex(-1);
+                }}
+                onKeyDown={handleUniKeyDown}
+                placeholder="Search Universities"
+                className="flex-1 bg-transparent text-white outline-none"
+              />
+            </div>
+
+            {showUniSuggestions && uniSuggestions.length > 0 && (
+              <div
+                ref={uniSuggestionsRef}
+                className="absolute z-30 w-full bg-gray-800 border border-gray-700 rounded shadow-lg mt-1"
+              >
+                {uniSuggestions.map((u, i) => (
+                  <button
+                    key={u}
+                    onClick={() => selectUni(u)}
+                    className={`w-full text-left px-4 py-2 ${
+                      i === uniHighlightIndex ? "bg-[#0a1a3a]" : "hover:bg-gray-700"
+                    } text-white`}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Profession */}
           <div>
