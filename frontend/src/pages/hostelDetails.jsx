@@ -4,6 +4,8 @@ import { useAuth } from "../Components/AuthContext";
 import { getHostelById, addQuestion, answerQuestion } from "../services/hostelService";
 import { addReview, deleteReview } from "../services/hostelService";
 import { incrementViewCount } from "../services/hostelService";
+import { getHostelFAQs } from "../services/ownerFaqService";
+
 
 export default function HostelDetail() {
   const { id } = useParams();
@@ -14,6 +16,7 @@ export default function HostelDetail() {
   const [selectedTab, setSelectedTab] = useState("reviews");
   const [reviews, setReviews] = useState([]);
   const [questions, setQuestions] = useState([]);
+  const [faqs, setFaqs] = useState([]);
 
   useEffect(() => {
     const fetchHostel = async () => {
@@ -29,6 +32,8 @@ export default function HostelDetail() {
           setReviews(hostelData.reviews || []);
           setQuestions(hostelData.questions || []);
           incrementViewCount(id).catch(err => console.error("Failed to increment views:", err));
+          const faqsData = await getHostelFAQs(id);
+          setFaqs(faqsData || []);
         } else {
           console.error("Hostel data is null");
         }
@@ -40,6 +45,7 @@ export default function HostelDetail() {
       }
     };
     fetchHostel();
+    
   }, [id]);
 
   if (loading) {
@@ -232,6 +238,17 @@ export default function HostelDetail() {
                 >
                   Questions
                 </button>
+
+                  <button
+                  className={`py-4 px-1 border-b-2 font-medium ${
+                    selectedTab === "faqs"
+                      ? "text-slate-300 border-slate-500"
+                      : "text-gray-500 hover:text-gray-300 hover:border-gray-500"
+                  }`}
+                  onClick={() => setSelectedTab("faqs")}
+                >
+                  FAQs
+                </button>
               </nav>
             </div>
 
@@ -365,6 +382,29 @@ export default function HostelDetail() {
                     <p className="text-gray-400">No questions asked yet.</p>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* FAQs Tab */}
+            {selectedTab === "faqs" && (
+              <div className="py-6">
+                <h3 className="text-2xl font-semibold mb-4">Frequently Asked Questions</h3>
+
+                {faqs.length === 0 ? (
+                  <p className="text-gray-400">No FAQs added for this hostel.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {faqs.map((f) => (
+                      <div
+                        key={f._id}
+                        className="p-4 border border-gray-700 rounded-lg bg-gray-700"
+                      >
+                        <p className="font-semibold text-white">Q: {f.question}</p>
+                        <p className="text-gray-300 mt-1">A: {f.answer}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
