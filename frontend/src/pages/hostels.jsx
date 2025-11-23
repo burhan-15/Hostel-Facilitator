@@ -9,7 +9,8 @@ export default function Hostels() {
 
   // FILTER STATES
   const [gender, setGender] = useState("");
-  const [area, setArea] = useState("");
+  const [selectedAreas, setSelectedAreas] = useState([]); // multiple area tags
+  const [areaInput, setAreaInput] = useState(""); // typing input
   const [profession, setProfession] = useState("");
   const [minRating, setMinRating] = useState("");
   const [minRent, setMinRent] = useState(0);
@@ -61,10 +62,7 @@ export default function Hostels() {
   // CALCULATE AVG RATING
   const calcRating = (reviews) => {
     if (!Array.isArray(reviews) || reviews.length === 0) return 0;
-    const total = reviews.reduce(
-      (sum, r) => sum + Number(r?.rating || 0),
-      0
-    );
+    const total = reviews.reduce((sum, r) => sum + Number(r?.rating || 0), 0);
     return total / reviews.length;
   };
 
@@ -74,22 +72,15 @@ export default function Hostels() {
 
     if (gender) result = result.filter((h) => h.gender === gender);
 
-    if (area)
-      result = result.filter(
-        (h) => h.area?.toLowerCase() === area.toLowerCase()
-      );
+    if (selectedAreas.length > 0)
+      result = result.filter((h) => selectedAreas.includes(h.area));
 
-    if (profession)
-      result = result.filter((h) => h.profession === profession);
+    if (profession) result = result.filter((h) => h.profession === profession);
 
-    result = result.filter(
-      (h) => h.rent >= minRent && h.rent <= maxRent
-    );
+    result = result.filter((h) => h.rent >= minRent && h.rent <= maxRent);
 
     if (minRating) {
-      result = result.filter(
-        (h) => calcRating(h.reviews) >= Number(minRating)
-      );
+      result = result.filter((h) => calcRating(h.reviews) >= Number(minRating));
     }
 
     setFilteredHostels(result);
@@ -97,7 +88,8 @@ export default function Hostels() {
 
   const resetFilters = () => {
     setGender("");
-    setArea("");
+    setSelectedAreas([]);
+    setAreaInput("");
     setProfession("");
     setMinRating("");
     setMinRent(0);
@@ -116,13 +108,9 @@ export default function Hostels() {
       return;
     }
 
-    const matches = hostels.filter((h) =>
-      h.name?.toLowerCase().includes(q)
-    );
+    const matches = hostels.filter((h) => h.name?.toLowerCase().includes(q));
 
-    setSuggestions(
-      matches.slice(0, 6).map((m) => ({ name: m.name, id: m._id }))
-    );
+    setSuggestions(matches.slice(0, 6).map((m) => ({ name: m.name, id: m._id })));
 
     setSearchResults(matches);
     setShowSuggestions(true);
@@ -133,9 +121,7 @@ export default function Hostels() {
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlightIndex((prev) =>
-        prev < suggestions.length - 1 ? prev + 1 : prev
-      );
+      setHighlightIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlightIndex((prev) => (prev > 0 ? prev - 1 : -1));
@@ -153,9 +139,7 @@ export default function Hostels() {
     setSearchText(name || "");
     const q = name?.toLowerCase() || "";
 
-    const matches = hostels.filter((h) =>
-      h.name?.toLowerCase().includes(q)
-    );
+    const matches = hostels.filter((h) => h.name?.toLowerCase().includes(q));
     setSearchResults(matches);
     setShowSuggestions(false);
   };
@@ -163,9 +147,7 @@ export default function Hostels() {
   const handleSearchClick = () => {
     const q = searchText?.toLowerCase() || "";
 
-    const matches = hostels.filter((h) =>
-      h.name?.toLowerCase().includes(q)
-    );
+    const matches = hostels.filter((h) => h.name?.toLowerCase().includes(q));
 
     setSearchResults(matches);
     setShowSuggestions(false);
@@ -173,7 +155,7 @@ export default function Hostels() {
 
   // AREA TYPEAHEAD LOGIC
   useEffect(() => {
-    const q = area?.trim()?.toLowerCase() || "";
+    const q = areaInput?.trim()?.toLowerCase() || "";
 
     if (!q) {
       setAreaSuggestions([]);
@@ -181,13 +163,13 @@ export default function Hostels() {
       return;
     }
 
-    const matches = availableAreas.filter((a) =>
-      a.toLowerCase().includes(q)
+    const matches = availableAreas.filter(
+      (a) => a.toLowerCase().includes(q) && !selectedAreas.includes(a)
     );
 
     setAreaSuggestions(matches);
     setShowAreaSuggestions(true);
-  }, [area, availableAreas]);
+  }, [areaInput, availableAreas, selectedAreas]);
 
   const handleAreaKeyDown = (e) => {
     if (!showAreaSuggestions) return;
@@ -204,6 +186,8 @@ export default function Hostels() {
       e.preventDefault();
       if (areaHighlightIndex >= 0) {
         selectArea(areaSuggestions[areaHighlightIndex]);
+      } else if (areaSuggestions.length > 0) {
+        selectArea(areaSuggestions[0]);
       }
     } else if (e.key === "Escape") {
       setShowAreaSuggestions(false);
@@ -211,8 +195,13 @@ export default function Hostels() {
   };
 
   const selectArea = (value) => {
-    setArea(value);
+    setSelectedAreas((prev) => [...prev, value]);
+    setAreaInput("");
     setShowAreaSuggestions(false);
+  };
+
+  const removeArea = (value) => {
+    setSelectedAreas((prev) => prev.filter((a) => a !== value));
   };
 
   // WHICH HOSTELS TO SHOW?
@@ -272,9 +261,7 @@ export default function Hostels() {
                   key={s.id}
                   onClick={() => handleSuggestionClick(s.name)}
                   className={`w-full text-left px-4 py-2 ${
-                    i === highlightIndex
-                      ? "bg-[#0a1a3a]"
-                      : "hover:bg-gray-700"
+                    i === highlightIndex ? "bg-[#0a1a3a]" : "hover:bg-gray-700"
                   } text-white`}
                 >
                   {s.name}
@@ -304,21 +291,59 @@ export default function Hostels() {
             </select>
           </div>
 
-          {/* Area Typeahead */}
+          {/* AREA MULTI-TAG INPUT */}
           <div className="relative">
             <label className="text-gray-300">Area</label>
-            <input
-              ref={areaInputRef}
-              type="text"
-              value={area}
-              onChange={(e) => {
-                setArea(e.target.value || "");
-                setAreaHighlightIndex(-1);
-              }}
-              onKeyDown={handleAreaKeyDown}
-              placeholder="Search area..."
-              className="w-full mt-2 p-2 bg-gray-700 text-white rounded"
-            />
+            <div
+              className="flex flex-wrap items-center gap-1 mt-2 p-2 bg-gray-700 rounded cursor-text"
+              onClick={() => areaInputRef.current.focus()}
+            >
+              {selectedAreas.map((area) => (
+                <span
+                  key={area}
+                  className="bg-indigo-600 text-white px-2 rounded-full flex items-center gap-1"
+                >
+                  {area}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeArea(area);
+                    }}
+                    className="text-white font-bold ml-1"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+
+              <input
+                ref={areaInputRef}
+                type="text"
+                value={areaInput}
+                onChange={(e) => {
+                  setAreaInput(e.target.value || "");
+                  setAreaHighlightIndex(-1);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (areaSuggestions.length > 0) {
+                      selectArea(areaSuggestions[areaHighlightIndex >= 0 ? areaHighlightIndex : 0]);
+                    } else if (areaInput.trim()) {
+                      // allow adding custom area
+                      selectArea(areaInput.trim());
+                    }
+                  } else if (e.key === "Backspace" && !areaInput && selectedAreas.length > 0) {
+                    // remove last tag on Backspace
+                    removeArea(selectedAreas[selectedAreas.length - 1]);
+                  } else {
+                    handleAreaKeyDown(e);
+                  }
+                }}
+                placeholder="Search Areas"
+                className="flex-1 bg-transparent text-white outline-none"
+              />
+            </div>
 
             {showAreaSuggestions && areaSuggestions.length > 0 && (
               <div
@@ -330,9 +355,7 @@ export default function Hostels() {
                     key={a}
                     onClick={() => selectArea(a)}
                     className={`w-full text-left px-4 py-2 ${
-                      i === areaHighlightIndex
-                        ? "bg-[#0a1a3a]"
-                        : "hover:bg-gray-700"
+                      i === areaHighlightIndex ? "bg-[#0a1a3a]" : "hover:bg-gray-700"
                     } text-white`}
                   >
                     {a}
@@ -341,6 +364,7 @@ export default function Hostels() {
               </div>
             )}
           </div>
+
 
           {/* Profession */}
           <div>
@@ -391,8 +415,7 @@ export default function Hostels() {
                 let value = Math.round((percent * 100000) / 500) * 500;
                 value = Math.max(0, Math.min(100000, value));
 
-                const nearMin =
-                  Math.abs(value - minRent) < Math.abs(value - maxRent);
+                const nearMin = Math.abs(value - minRent) < Math.abs(value - maxRent);
 
                 if (nearMin && value <= maxRent) setMinRent(value);
                 else if (!nearMin && value >= minRent) setMaxRent(value);

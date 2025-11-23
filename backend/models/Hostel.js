@@ -40,6 +40,42 @@ const hostelSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+
+    nearbyUniversities: {
+      type: [String],
+      enum: [
+        "NUST",
+        "FAST",
+        "COMSATS",
+        "Air University",
+        "QAU",
+        "Bahria University",
+        "IST",
+        "Riphah International",
+        "NUML",
+        "Islamabad Model College",
+        "PIEAS",
+        "Shifa College of Medicine",
+        "Rawalpindi Medical University",
+        "Army Medical College",
+        "Islamic International Medical College",
+        "Federal Medical College",
+        "SZAB Medical University",
+        "Al-Nafees Medical College",
+      ],
+      default: [],
+    },
+
+    views: {
+      type: Number,
+      default: 0,
+    },
+
+    shortlists: {
+      type: Number,
+      default: 0,
+    },
+
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

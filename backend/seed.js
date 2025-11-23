@@ -30,26 +30,37 @@ const seedData = async () => {
     const createdUsers = await User.insertMany(hashedUsers);
     console.log("👤 Users inserted");
 
-    // --- Build a map 1,2,3 => ObjectId ---
+    // --- Map numeric IDs -> actual ObjectIds ---
     const userIdMap = {};
     createdUsers.forEach((u, index) => {
       userIdMap[index + 1] = u._id;
     });
 
-    // --- Fix numeric userIds in hostels ---
+    // --- Fix numeric userIds in hostels and make them compatible with schema ---
     const hostelsWithFixedIds = hostels.map((h) => ({
       ...h,
-      ownerId: createdUsers[1]._id,
 
-      reviews: h.reviews?.map((r) => ({
-        ...r,
-        userId: userIdMap[r.userId],
-      })) || [],
+      // Ensure ownerId is a valid ObjectId
+      ownerId: createdUsers[1]._id, // or modify based on your logic
 
-      questions: h.questions?.map((q) => ({
-        ...q,
-        userId: userIdMap[q.userId],
-      })) || [],
+      // Replace review userIds with actual ObjectIds
+      reviews:
+        h.reviews?.map((r) => ({
+          ...r,
+          userId: userIdMap[r.userId],
+        })) || [],
+
+      // Replace question userIds with actual ObjectIds
+      questions:
+        h.questions?.map((q) => ({
+          ...q,
+          userId: userIdMap[q.userId],
+        })) || [],
+
+      // Ensure new fields exist (if missing)
+      views: h.views ?? 0,
+      shortlists: h.shortlists ?? 0,
+      universitiesNearby: h.universitiesNearby ?? [],
     }));
 
     await Hostel.insertMany(hostelsWithFixedIds);

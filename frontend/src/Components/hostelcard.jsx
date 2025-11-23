@@ -18,7 +18,7 @@ export default function HostelCard({ hostel }) {
       ? (
           hostel.reviews.reduce((sum, r) => sum + r.rating, 0) /
           hostel.reviews.length
-        ).toFixed(1)
+        ).toFixed(1) +  ` (${hostel.reviews.length})`
       : "N/A";
 
   // Don't render link if no ID

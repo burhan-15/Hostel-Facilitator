@@ -2,14 +2,41 @@ import { useState } from "react";
 import { updateHostel as updateHostelAPI } from "../services/hostelService";
 
 export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
-
-  // Pre-fill form values from hostel
+  // Pre-fill values
   const [name, setName] = useState(hostel.name);
   const [area, setArea] = useState(hostel.area);
   const [rent, setRent] = useState(hostel.rent);
   const [gender, setGender] = useState(hostel.gender);
   const [profession, setProfession] = useState(hostel.profession);
   const [desc, setDesc] = useState(hostel.description);
+  const [amenities, setAmenities] = useState(hostel.amenities || []);
+
+  // NEW FIELD: nearby universities
+  const universityOptions = [
+    "NUST",
+    "FAST",
+    "Comsats",
+    "IQRA",
+    "IST",
+    "Air University",
+    "Bahria University",
+    "PIEAS",
+    "Shifa Medical College",
+    "Rawal Institute of Health Sciences",
+    "Fazaia Medical College",
+  ];
+
+  const [nearbyUniversities, setNearbyUniversities] = useState(
+    hostel.nearbyUniversities || []
+  );
+
+  const toggleUniversity = (uni) => {
+    setNearbyUniversities((prev) =>
+      prev.includes(uni)
+        ? prev.filter((u) => u !== uni)
+        : [...prev, uni]
+    );
+  };
 
   const amenityList = [
     "Wi-Fi",
@@ -24,8 +51,6 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
     "Common Room",
     "Kitchenette",
   ];
-
-  const [amenities, setAmenities] = useState(hostel.amenities);
 
   const toggleAmenity = (amenity) => {
     setAmenities((prev) =>
@@ -43,6 +68,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
 
     try {
       const hostelId = hostel._id || hostel.id;
+
       const updated = {
         name,
         area,
@@ -51,14 +77,15 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
         profession,
         description: desc,
         amenities,
+        nearbyUniversities, // NEW FIELD INCLUDED
       };
 
       await updateHostelAPI(hostelId, updated);
-      updateHostel(); // Refresh the list
+      updateHostel();
       closeModal();
-    } catch (error) {
-      console.error("Error updating hostel:", error);
-      alert(error.response?.data?.message || "Failed to update hostel");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to update hostel");
     } finally {
       setLoading(false);
     }
@@ -71,48 +98,30 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="
-          bg-gray-800
-          rounded-lg
-          shadow-xl
-          w-full
-          max-w-lg
-          p-6
-          border border-gray-700
-          max-h-[80vh]
-          overflow-y-auto
-        "
+        className="bg-gray-800 rounded-lg shadow-xl w-full max-w-lg p-6 border border-gray-700 max-h-[80vh] overflow-y-auto"
       >
-        <h3 className="text-2xl font-bold text-white mb-4">
-          Update Hostel Details
-        </h3>
+        <h3 className="text-2xl font-bold text-white mb-4">Update Hostel Details</h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          {/* Name & Area */}
+          {/* Name and Area */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300">
-                Hostel Name
-              </label>
+              <label className="block text-sm text-gray-300">Hostel Name</label>
               <input
-                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"
+                className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300">
-                Area
-              </label>
+              <label className="block text-sm text-gray-300">Area</label>
               <input
-                type="text"
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
-                className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"
+                className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
                 required
               />
             </div>
@@ -120,28 +129,23 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
 
           {/* Rent */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Monthly Rent (PKR)
-            </label>
+            <label className="block text-sm text-gray-300">Monthly Rent (PKR)</label>
             <input
               type="number"
               value={rent}
               onChange={(e) => setRent(Number(e.target.value))}
-              className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"
-              required
+              className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
             />
           </div>
 
-          {/* Gender & Profession */}
+          {/* Gender + Profession */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300">
-                Gender
-              </label>
+              <label className="block text-sm text-gray-300">Gender</label>
               <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"
+                className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
               >
                 <option>Male</option>
                 <option>Female</option>
@@ -149,40 +153,33 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300">
-                Profession
-              </label>
+              <label className="block text-sm text-gray-300">Profession</label>
               <select
                 value={profession}
                 onChange={(e) => setProfession(e.target.value)}
-                className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"
+                className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
               >
                 <option>Student</option>
                 <option>Professional</option>
+                <option>Both</option>
               </select>
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-300">
-              Description
-            </label>
+            <label className="block text-sm text-gray-300">Description</label>
             <textarea
               rows="3"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
-              className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"
-              required
+              className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
             ></textarea>
           </div>
 
           {/* Amenities */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Amenities
-            </label>
-
+            <label className="block text-sm text-gray-300 mb-1">Amenities</label>
             <div className="grid grid-cols-2 gap-2">
               {amenityList.map((a) => (
                 <label key={a} className="flex items-center text-gray-300 space-x-2">
@@ -190,9 +187,27 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
                     type="checkbox"
                     checked={amenities.includes(a)}
                     onChange={() => toggleAmenity(a)}
-                    className="w-4 h-4 accent-slate-600"
+                    className="w-4 h-4"
                   />
                   <span>{a}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* NEW SECTION — Nearby Universities */}
+          <div>
+            <label className="block text-sm text-gray-300 mb-1">Nearby Universities</label>
+            <div className="grid grid-cols-2 gap-2">
+              {universityOptions.map((u) => (
+                <label key={u} className="flex items-center space-x-2 text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={nearbyUniversities.includes(u)}
+                    onChange={() => toggleUniversity(u)}
+                    className="w-4 h-4"
+                  />
+                  <span>{u}</span>
                 </label>
               ))}
             </div>
@@ -203,20 +218,18 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
             <button
               type="button"
               onClick={closeModal}
-              className="px-4 py-2 bg-gray-600 text-gray-200 rounded-lg hover:bg-gray-500"
+              className="px-4 py-2 bg-gray-600 text-gray-200 rounded-lg"
             >
               Cancel
             </button>
 
             <button
-              type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
             >
               {loading ? "Saving..." : "Save Changes"}
             </button>
           </div>
-
         </form>
       </div>
     </div>

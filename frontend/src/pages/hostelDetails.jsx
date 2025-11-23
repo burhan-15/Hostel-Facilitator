@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../Components/AuthContext";
 import { getHostelById, addQuestion, answerQuestion } from "../services/hostelService";
-import { addReview, deleteReview, } from "../services/hostelService";
+import { addReview, deleteReview } from "../services/hostelService";
 
 export default function HostelDetail() {
   const { id } = useParams();
@@ -32,13 +32,7 @@ export default function HostelDetail() {
         }
       } catch (error) {
         console.error("Error fetching hostel:", error);
-        console.error("Error response:", error.response);
-        // Show error message to user
-        if (error.response?.status === 404) {
-          // Hostel not found - will be handled by the "if (!hostel)" check
-        } else {
-          alert("Failed to load hostel details. Please try again.");
-        }
+        alert("Failed to load hostel details. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -53,7 +47,7 @@ export default function HostelDetail() {
       </div>
     );
   }
-  
+
   if (!hostel) {
     return (
       <div className="bg-gray-900 min-h-screen flex items-center justify-center">
@@ -161,7 +155,21 @@ export default function HostelDetail() {
               <h3 className="text-2xl font-semibold mb-2">Description</h3>
               <p className="text-gray-300 leading-relaxed mb-6">{hostel.description}</p>
 
-              <h3 className="text-2xl font-semibold mb-4">Amenities</h3>
+              {hostel.nearbyUniversities && hostel.nearbyUniversities.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-2xl font-semibold mb-4">Nearby Universities</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {hostel.nearbyUniversities.map((uni, i) => (
+                      <div key={i} className="flex items-center text-gray-300">
+                        <span className=" mr-2">⚪</span>
+                        {uni}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <h3 className="text-2xl font-semibold mb-4 mt-4">Amenities</h3>
               {hostel.amenities && hostel.amenities.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
                   {hostel.amenities.map((amenity, i) => (
@@ -228,13 +236,9 @@ export default function HostelDetail() {
             {/* Reviews Tab */}
             {selectedTab === "reviews" && (
               <div className="py-6">
-
-                {/* Review form */}
                 {currentUser?.role === "user" && !userHasReviewed && (
                   <ReviewForm onSubmit={handleAddReview} />
                 )}
-
-                {/* Review list */}
                 <div className="space-y-4 mt-6">
                   {reviews.length > 0 ? (
                     reviews.map((review) => {
@@ -264,12 +268,9 @@ export default function HostelDetail() {
                                   </span>
                                 ))}
                               </div>
-                              <p className="ml-3 font-semibold text-white">
-                                {userName}
-                              </p>
+                              <p className="ml-3 font-semibold text-white">{userName}</p>
                             </div>
 
-                            {/* Admin delete */}
                             {currentUser?.role === "admin" && (
                               <button
                                 onClick={() => handleRemoveReview(reviewId)}
@@ -279,7 +280,6 @@ export default function HostelDetail() {
                               </button>
                             )}
                           </div>
-
                           <p className="text-gray-300">{review.text}</p>
                         </div>
                       );
@@ -296,13 +296,9 @@ export default function HostelDetail() {
             {/* Questions Tab */}
             {selectedTab === "questions" && (
               <div className="py-6">
-
-                {/* Ask question */}
                 {currentUser && currentUser.role === "user" && (
                   <QuestionForm onSubmit={handleAddQuestion} />
                 )}
-
-                {/* Q&A list */}
                 <div className="space-y-4">
                   {questions.length > 0 ? (
                     questions.map((q) => {
@@ -332,12 +328,8 @@ export default function HostelDetail() {
 
                           {q.answer ? (
                             <div className="mt-2 pl-4 border-l-2 border-slate-500">
-                              <p className="font-semibold text-white">
-                                A: {q.answer}
-                              </p>
-                              <p className="text-sm text-gray-400">
-                                Answered by Hostel Owner
-                              </p>
+                              <p className="font-semibold text-white">A: {q.answer}</p>
+                              <p className="text-sm text-gray-400">Answered by Hostel Owner</p>
                             </div>
                           ) : isOwner ? (
                             <AnswerForm 
@@ -380,6 +372,7 @@ export default function HostelDetail() {
   );
 }
 
+// --- Review Form ---
 function ReviewForm({ onSubmit }) {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
@@ -390,7 +383,6 @@ function ReviewForm({ onSubmit }) {
 
       <div className="mb-2">
         <label className="block text-sm font-medium text-gray-300">Rating</label>
-
         <select
           className="w-full bg-gray-800 p-2 mt-1 rounded text-white border border-gray-600"
           value={rating}
@@ -422,6 +414,7 @@ function ReviewForm({ onSubmit }) {
   );
 }
 
+// --- Question Form ---
 function QuestionForm({ onSubmit }) {
   const [text, setText] = useState("");
 
@@ -452,6 +445,7 @@ function QuestionForm({ onSubmit }) {
   );
 }
 
+// --- Answer Form ---
 function AnswerForm({ hostelId, questionId, onAnswer }) {
   const [answer, setAnswer] = useState("");
 
