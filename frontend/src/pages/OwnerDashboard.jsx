@@ -175,45 +175,6 @@ export default function OwnerDashboard() {
               return (
                 <HostelCard
                   key={hostelId}
-                  className="flex flex-wrap justify-between items-center p-3 bg-gray-700 border border-gray-600 rounded-lg gap-2"
-                >
-                  <div>
-                    <p className="font-semibold">
-                      {h.name}{' '}
-                      <span
-                        className={`text-xs font-bold px-2 py-1 rounded-full ${
-                          h.status === "approved"
-                            ? "text-green-300 bg-green-800"
-                            : "text-yellow-300 bg-yellow-800"
-                        }`}
-                      >
-                        {h.status.toUpperCase()}
-                      </span>
-                    </p>
-                    <p className="text-sm text-gray-400">{h.area}</p>
-                    <p className="text-sm text-gray-400">Views: {h.views}</p>
-                    <p className="text-sm text-gray-400">Shortlists: {h.shortlists}</p>
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => {
-                        setEditHostel(h);
-                        setShowEditModal(true);
-                      }}
-                      className="text-sm px-3 py-1 bg-blue-600 rounded-md hover:bg-blue-700"
-                    >
-                      Update
-                    </button>
-
-                    <button
-                      onClick={() => handleDeleteHostel(hostelId)}
-                      className="text-sm px-3 py-1 bg-red-600 rounded-md hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
                   hostel={h}
                   hostelFaqs={hostelFaqs[hostelId] || []}
                   faqEdits={faqEdits}
