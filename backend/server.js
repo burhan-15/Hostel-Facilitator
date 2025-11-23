@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import hostelRoutes from "./routes/hostelRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import faqRoutes from "./routes/faqRoutes.js";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/hostels", hostelRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/faqs", faqRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

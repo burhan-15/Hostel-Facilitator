@@ -43,6 +43,9 @@ export default function Navbar() {
             Hostels
           </NavLink>
 
+          <NavLink to="/faq" className="text-white hover:text-indigo-400">FAQ</NavLink>
+
+
           <NavLink
             to="/about"
             className={({ isActive }) =>

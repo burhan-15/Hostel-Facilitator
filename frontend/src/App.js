@@ -10,6 +10,7 @@ import Signup from "./pages/signup";
 import UserDashboard from "./pages/UserDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import FAQ from "./pages/FAQ";
 import Footer from "./Components/footer";
 import { AuthProvider } from "./Components/AuthContext";
 
@@ -30,6 +31,7 @@ function App() {
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/owner" element={<OwnerDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/faq" element={<FAQ />} />
         </Routes>
 
         <Footer />
