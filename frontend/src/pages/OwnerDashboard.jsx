@@ -127,6 +127,7 @@ export default function OwnerDashboard() {
                       </span>
                     </p>
                     <p className="text-sm text-gray-400">{h.area}</p>
+                    <p className="text-sm text-gray-400">Views: {h.views}</p>
                   </div>
 
                   <div className="flex items-center space-x-2">

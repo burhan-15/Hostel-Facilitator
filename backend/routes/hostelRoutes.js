@@ -8,7 +8,7 @@ import {
   approveHostel,
   rejectHostel,
   getHostelsByOwner,
-  
+  increaseViewCount,
 } from "../controllers/hostelController.js";
 import {addQuestion, answerQuestion, getQuestionsByUser} from "../controllers/questionController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
@@ -21,6 +21,7 @@ router.get("/admin", authenticate, authorize("admin"), getAllHostels);
 // Public routes (no auth required)
 router.get("/", getAllHostels);
 router.get("/:id", getHostelById);
+router.patch("/:id/views", increaseViewCount);
 
 // Protected routes
 router.post("/", authenticate, authorize("owner", "admin"), createHostel);

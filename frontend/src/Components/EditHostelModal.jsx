@@ -81,7 +81,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
         profession,
         description: desc,
         amenities,
-        nearbyUniversities, // NEW FIELD INCLUDED
+        nearbyUniversities,
       };
 
       await updateHostelAPI(hostelId, updated);

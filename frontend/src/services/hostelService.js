@@ -162,3 +162,15 @@ export const getUserQuestions = async () => {
   }
 };
 
+// Increment hostel view count
+export const incrementViewCount = async (hostelId) => {
+  try {
+    const res = await API.patch(`/hostels/${hostelId}/views`);
+    return res.data;
+  } catch (error) {
+    console.error("Error incrementing view count:", error);
+    // optional: don't throw, just fail silently to not break page load
+    return null;
+  }
+};
+

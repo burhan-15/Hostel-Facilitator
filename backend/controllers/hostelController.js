@@ -276,3 +276,32 @@ export const getHostelsByOwner = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+// Increment hostel view count
+export const increaseViewCount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Increment views by 1
+    const hostel = await Hostel.findByIdAndUpdate(
+      id,
+      { $inc: { views: 0.5 } },
+      { new: true }
+    ).populate("ownerId", "name email");
+
+    if (!hostel) {
+      return res.status(404).json({
+        success: false,
+        message: "Hostel not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      hostel,
+    });
+  } catch (error) {
+    console.error("Increase view count error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

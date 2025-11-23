@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../Components/AuthContext";
 import { getHostelById, addQuestion, answerQuestion } from "../services/hostelService";
 import { addReview, deleteReview } from "../services/hostelService";
+import { incrementViewCount } from "../services/hostelService";
 
 export default function HostelDetail() {
   const { id } = useParams();
@@ -27,6 +28,7 @@ export default function HostelDetail() {
           setHostel(hostelData);
           setReviews(hostelData.reviews || []);
           setQuestions(hostelData.questions || []);
+          incrementViewCount(id).catch(err => console.error("Failed to increment views:", err));
         } else {
           console.error("Hostel data is null");
         }
