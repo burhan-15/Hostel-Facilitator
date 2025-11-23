@@ -32,22 +32,10 @@ export default function Hostels() {
   const areaInputRef = useRef(null);
   const areaSuggestionsRef = useRef(null);
 
-  const availableAreas = [
-    "G-10",
-    "G-9",
-    "F-10",
-    "F-11",
-    "I-8",
-    "I-10",
-    "E-11",
-    "PWD",
-    "Bahria Town",
-    "Satellite Town",
-  ];
+  const [availableAreas, setAvailableAreas] = useState([]);
 
-  // -----------------------------------
+
   // LOAD HOSTELS INITIALLY
-  // -----------------------------------
   useEffect(() => {
     (async () => {
       try {
@@ -55,6 +43,12 @@ export default function Hostels() {
         const data = await getHostels();
         setHostels(data);
         setFilteredHostels(data);
+
+        const uniqueAreas = [...new Set(data.map(h => h.area).filter(Boolean))];
+        // Sort alphabetically
+        uniqueAreas.sort();
+        setAvailableAreas(uniqueAreas);
+
       } catch (err) {
         console.error(err);
       } finally {
@@ -63,9 +57,7 @@ export default function Hostels() {
     })();
   }, []);
 
-  // ---------------------------
   // CALCULATE AVG RATING
-  // ---------------------------
   const calcRating = (reviews) => {
     if (!reviews || reviews.length === 0) return 0;
     return (
@@ -74,9 +66,7 @@ export default function Hostels() {
     );
   };
 
-  // -----------------------------------
   // APPLY FILTERS BUTTON LOGIC
-  // -----------------------------------
   const applyFilters = () => {
     let result = [...hostels];
 
@@ -105,9 +95,7 @@ export default function Hostels() {
     setFilteredHostels(hostels);
   };
 
-  // -----------------------------------
   // LIVE SEARCH (INDEPENDENT)
-  // -----------------------------------
   useEffect(() => {
     if (!searchText.trim()) {
       setSearchResults([]);
@@ -165,9 +153,7 @@ export default function Hostels() {
     setShowSuggestions(false);
   };
 
-  // -----------------------------------
   // AREA TYPEAHEAD LOGIC
-  // -----------------------------------
   useEffect(() => {
     if (!area.trim()) {
       setAreaSuggestions([]);
@@ -210,17 +196,13 @@ export default function Hostels() {
     setShowAreaSuggestions(false);
   };
 
-  // -----------------------------------
   // WHICH HOSTELS TO SHOW?
-  // -----------------------------------
   const shownHostels =
     searchText.trim()
       ? searchResults.filter((h) => h.status === "approved")
       : filteredHostels.filter((h) => h.status === "approved");
 
-  // -----------------------------------
   // UI
-  // -----------------------------------
   if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
 
   return (
