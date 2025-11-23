@@ -14,7 +14,7 @@ export const hostels = [
     status: "approved",
     views: 250,
     shortlists: 45,
-    nearbyUniversities: ["FAST", "NUML", "Riphah International"],
+    nearbyUniversities: ["FAST", "NUML", "Riphah International University"],
     reviews: [
       {
         id: 201,
@@ -64,10 +64,9 @@ export const hostels = [
     views: 180,
     shortlists: 30,
     nearbyUniversities: [
-      "SZAB Medical University",
-      "Federal Medical College",
+      "SZABIST",
+      "Fazaia Medical College",
       "NUML",
-      "Riphah International",
     ],
     reviews: [],
     questions: [],
@@ -122,7 +121,7 @@ export const hostels = [
     status: "pending",
     views: 0,
     shortlists: 0,
-    nearbyUniversities: ["Shifa College of Medicine", "Riphah International"],
+    nearbyUniversities: ["Shifa College of Medicine", "Riphah International University"],
     reviews: [],
     questions: [],
   },
@@ -142,7 +141,7 @@ export const hostels = [
     status: "approved",
     views: 450,
     shortlists: 85,
-    nearbyUniversities: ["IST", "Air University", "PIEAS"],
+    nearbyUniversities: ["Institute of Space Technology (IST)", "Air University", "PIEAS"],
     reviews: [
       {
         id: 204,
