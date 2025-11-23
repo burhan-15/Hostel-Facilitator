@@ -47,6 +47,7 @@ const hostelSchema = new mongoose.Schema(
         "NUST",
         "FAST",
         "COMSATS",
+        "NUML",
         "Air University",
         "Bahria University",
         "Quaid-e-Azam University (QAU)",

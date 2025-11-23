@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import hostelRoutes from "./routes/hostelRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import faqRoutes from "./routes/faqRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/hostels", hostelRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/faqs", faqRoutes);
+app.use("/api/users", userRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
