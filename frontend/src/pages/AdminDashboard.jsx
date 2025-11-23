@@ -299,16 +299,16 @@ export default function AdminDashboard() {
                     <p className="text-gray-300">{f.answer}</p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-6">
                     <button
-                      className="px-3 py-1 bg-yellow-600 rounded"
+                      className="w-[5rem] bg-blue-600 rounded"
                       onClick={() => startEditingFAQ(f)}
                     >
                       Edit
                     </button>
 
                     <button
-                      className="px-3 py-1 bg-red-600 rounded"
+                      className="w-[5rem]  bg-red-600 rounded"
                       onClick={() => setConfirmDeleteId(f._id)}
                     >
                       Delete

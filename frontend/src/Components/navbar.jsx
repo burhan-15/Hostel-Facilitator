@@ -43,21 +43,13 @@ export default function Navbar() {
             Hostels
           </NavLink>
 
-          <NavLink to="/faq" className="text-white hover:text-indigo-400">FAQ</NavLink>
-
-
-          <NavLink
-            to="/about"
-            className={({ isActive }) =>
+          <NavLink to="/faq" className={({ isActive }) =>
               `text-sm font-medium transition ${
                 isActive
                   ? "text-white border-b-2 border-slate-500"
                   : "text-gray-300 hover:text-white"
               }`
-            }
-          >
-            About
-          </NavLink>
+            }>FAQs</NavLink>
 
           {currentUser && (
             <>

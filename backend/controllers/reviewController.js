@@ -153,3 +153,51 @@ export const getReviews = async (req, res) => {
   }
 };
 
+// Get all reviews made by the logged-in user
+export const getReviewsByUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    // Find all hostels containing at least one review by this user
+    const hostels = await Hostel.find({
+      "reviews.userId": userId,
+    }).select("name reviews");
+
+    if (!hostels || hostels.length === 0) {
+      return res.status(200).json({
+        success: true,
+        reviews: [],
+        message: "No reviews by this user",
+      });
+    }
+
+    // Extract only this user's reviews from each hostel
+    const userReviews = [];
+
+    hostels.forEach((hostel) => {
+      hostel.reviews.forEach((rev) => {
+        if (rev.userId.toString() === userId) {
+          userReviews.push({
+            reviewId: rev._id,
+            hostelId: hostel._id,
+            hostelName: hostel.name,
+            rating: rev.rating,
+            text: rev.text,
+            createdAt: rev.createdAt,
+          });
+        }
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      reviews: userReviews,
+    });
+  } catch (error) {
+    console.error("Get reviews by user error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

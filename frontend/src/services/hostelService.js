@@ -140,3 +140,25 @@ export const getReviews = async (hostelId) => {
     return [];
   }
 };
+
+export const getUserReviews = async () => {
+  try {
+    const res = await API.get(`/reviews/user/my-reviews`);
+    return res.data.reviews || [];
+  } catch (error) {
+    console.error("Error fetching user reviews:", error);
+    return [];
+  }
+};
+
+// Get all questions asked by the logged-in user
+export const getUserQuestions = async () => {
+  try {
+    const res = await API.get(`/hostels/user/my-questions`);
+    return res.data.questions || [];
+  } catch (error) {
+    console.error("Error fetching user questions:", error);
+    return [];
+  }
+};
+

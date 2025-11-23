@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../Components/AuthContext";
 import { getHostelById, addQuestion, answerQuestion } from "../services/hostelService";
-import { addReview, deleteReview, getReviews } from "../services/hostelService";
+import { addReview, deleteReview, } from "../services/hostelService";
 
 export default function HostelDetail() {
   const { id } = useParams();
@@ -22,11 +22,8 @@ export default function HostelDetail() {
           setLoading(false);
           return;
         }
-        console.log("Fetching hostel with ID:", id);
         const hostelData = await getHostelById(id);
         if (hostelData) {
-          console.log("Hostel data received:", hostelData);
-          console.log("Hostel _id:", hostelData._id);
           setHostel(hostelData);
           setReviews(hostelData.reviews || []);
           setQuestions(hostelData.questions || []);

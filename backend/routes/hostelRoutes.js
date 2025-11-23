@@ -8,9 +8,9 @@ import {
   approveHostel,
   rejectHostel,
   getHostelsByOwner,
-  addQuestion,
-  answerQuestion,
+  
 } from "../controllers/hostelController.js";
+import {addQuestion, answerQuestion, getQuestionsByUser} from "../controllers/questionController.js";
 import { authenticate, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -37,6 +37,7 @@ router.patch("/:id/reject", authenticate, authorize("admin"), rejectHostel);
 // Question routes
 router.post("/:id/questions", authenticate, addQuestion);
 router.post("/:id/questions/:questionId/answer", authenticate, authorize("owner", "admin"), answerQuestion);
+router.get("/user/my-questions", authenticate, getQuestionsByUser);
 
 export default router;
 
