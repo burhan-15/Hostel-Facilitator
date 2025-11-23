@@ -15,15 +15,19 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
   const universityOptions = [
     "NUST",
     "FAST",
-    "Comsats",
-    "IQRA",
-    "IST",
+    "COMSATS",
     "Air University",
     "Bahria University",
+    "Quaid-e-Azam University (QAU)",
+    "Riphah International University",
+    "SZABIST",
+    "Institute of Space Technology (IST)",
     "PIEAS",
-    "Shifa Medical College",
-    "Rawal Institute of Health Sciences",
+    "Al-Nafees Medical College",
     "Fazaia Medical College",
+    "Shifa College of Medicine",
+    "HBS Medical College",
+    "Islamabad Medical & Dental College (IMDC)"
   ];
 
   const [nearbyUniversities, setNearbyUniversities] = useState(

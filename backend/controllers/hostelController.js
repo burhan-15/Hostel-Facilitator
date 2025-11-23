@@ -5,21 +5,17 @@ import User from "../models/User.js";
 export const getAllHostels = async (req, res) => {
   try {
     const { status, area, gender, profession, minRent, maxRent } = req.query;
-    
-    // Build filter object
+
     const filter = {};
-    
-    // If user is not admin, only show approved hostels
+
     if (req.user?.role !== "admin") {
       filter.status = "approved";
     }
-    
-
 
     if (area) filter.area = area;
     if (gender) filter.gender = gender;
     if (profession) filter.profession = profession;
-    
+
     if (minRent || maxRent) {
       filter.rent = {};
       if (minRent) filter.rent.$gte = Number(minRent);
@@ -37,10 +33,7 @@ export const getAllHostels = async (req, res) => {
     });
   } catch (error) {
     console.error("Get all hostels error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -48,21 +41,21 @@ export const getAllHostels = async (req, res) => {
 export const getHostelById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const hostel = await Hostel.findById(id).populate("ownerId", "name email");
-    
+
+    const hostel = await Hostel.findById(id)
+      .populate("ownerId", "name email");
+
     if (!hostel) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Hostel not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Hostel not found",
       });
     }
 
-    // Only show approved hostels to non-admin users
     if (req.user?.role !== "admin" && hostel.status !== "approved") {
-      return res.status(403).json({ 
-        success: false, 
-        message: "Hostel not available" 
+      return res.status(403).json({
+        success: false,
+        message: "Hostel not available",
       });
     }
 
@@ -72,27 +65,27 @@ export const getHostelById = async (req, res) => {
     });
   } catch (error) {
     console.error("Get hostel by ID error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Create new hostel (owner only)
+// Create new hostel
 export const createHostel = async (req, res) => {
   try {
-    const { name, area, rent, gender, profession, description, image, amenities } = req.body;
+    const { 
+      name, area, rent, gender, profession, description, 
+      image, amenities, universitiesNearby 
+    } = req.body;
 
-    // Validate required fields
+    console.log(req.body);
+
     if (!name || !area || !rent || !gender || !profession || !description) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Please provide all required fields" 
+      return res.status(400).json({
+        success: false,
+        message: "Please provide all required fields",
       });
     }
 
-    // Create hostel
     const hostel = await Hostel.create({
       name,
       area,
@@ -102,8 +95,12 @@ export const createHostel = async (req, res) => {
       description,
       image: image || "https://placehold.co/600x400/4f46e5/ffffff?text=Hostel+Image",
       amenities: amenities || [],
+
+      // ✅ FIXED: MUST MATCH SCHEMA EXACTLY
+      nearbyUniversities: universitiesNearby || [],
+
       ownerId: req.user.userId,
-      status: "pending", // New hostels need admin approval
+      status: "pending",
     });
 
     const populatedHostel = await Hostel.findById(hostel._id)
@@ -116,40 +113,43 @@ export const createHostel = async (req, res) => {
     });
   } catch (error) {
     console.error("Create hostel error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Update hostel (owner only, can only update their own hostels)
+
+// Update hostel
 export const updateHostel = async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
 
     const hostel = await Hostel.findById(id);
-    
+
     if (!hostel) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Hostel not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Hostel not found",
       });
     }
 
-    // Check if user is the owner or admin
     if (hostel.ownerId.toString() !== req.user.userId && req.user.role !== "admin") {
-      return res.status(403).json({ 
-        success: false, 
-        message: "You can only update your own hostels" 
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own hostels",
       });
     }
 
-    // Don't allow status changes through regular update (use approve/reject endpoints)
-    delete updates.status;
+    delete updates.status; // prevent status tampering
 
-    // Update hostel
+    // Allow nearbyUniversities update
+    if (updates.nearbyUniversities && !Array.isArray(updates.nearbyUniversities)) {
+      return res.status(400).json({
+        success: false,
+        message: "nearbyUniversities must be an array.",
+      });
+    }
+
     Object.assign(hostel, updates);
     await hostel.save();
 
@@ -163,32 +163,28 @@ export const updateHostel = async (req, res) => {
     });
   } catch (error) {
     console.error("Update hostel error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Delete hostel (owner or admin)
+// Delete hostel
 export const deleteHostel = async (req, res) => {
   try {
     const { id } = req.params;
 
     const hostel = await Hostel.findById(id);
-    
+
     if (!hostel) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Hostel not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Hostel not found",
       });
     }
 
-    // Check if user is the owner or admin
     if (hostel.ownerId.toString() !== req.user.userId && req.user.role !== "admin") {
-      return res.status(403).json({ 
-        success: false, 
-        message: "You can only delete your own hostels" 
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete your own hostels",
       });
     }
 
@@ -200,24 +196,21 @@ export const deleteHostel = async (req, res) => {
     });
   } catch (error) {
     console.error("Delete hostel error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Approve hostel (admin only)
+// Approve hostel
 export const approveHostel = async (req, res) => {
   try {
     const { id } = req.params;
 
     const hostel = await Hostel.findById(id);
-    
+
     if (!hostel) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Hostel not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Hostel not found",
       });
     }
 
@@ -234,28 +227,24 @@ export const approveHostel = async (req, res) => {
     });
   } catch (error) {
     console.error("Approve hostel error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-// Reject hostel (admin only)
+// Reject hostel
 export const rejectHostel = async (req, res) => {
   try {
     const { id } = req.params;
 
     const hostel = await Hostel.findById(id);
-    
+
     if (!hostel) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Hostel not found" 
+      return res.status(404).json({
+        success: false,
+        message: "Hostel not found",
       });
     }
 
-    // Delete the hostel (or set status to rejected if you want to keep it)
     await Hostel.findByIdAndDelete(id);
 
     res.status(200).json({
@@ -264,10 +253,7 @@ export const rejectHostel = async (req, res) => {
     });
   } catch (error) {
     console.error("Reject hostel error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -287,11 +273,6 @@ export const getHostelsByOwner = async (req, res) => {
     });
   } catch (error) {
     console.error("Get hostels by owner error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Server error" 
-    });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
-
