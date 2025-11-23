@@ -22,6 +22,10 @@ export const addToWishlist = async (req, res) => {
     user.wishlist.push(hostelId);
     await user.save();
 
+    // Increment shortlists
+    hostel.shortlists = (hostel.shortlists || 0) + 1;
+    await hostel.save();
+
     res.status(200).json({ success: true, message: "Hostel added to wishlist", wishlist: user.wishlist });
   } catch (error) {
     console.error("Add to wishlist error:", error);
@@ -42,6 +46,13 @@ export const removeFromWishlist = async (req, res) => {
 
     user.wishlist = user.wishlist.filter(id => id.toString() !== hostelId);
     await user.save();
+
+    // Decrement shortlists
+    const hostel = await Hostel.findById(hostelId);
+    if (hostel && hostel.shortlists > 0) {
+      hostel.shortlists -= 1;
+      await hostel.save();
+    }
 
     res.status(200).json({ success: true, message: "Hostel removed from wishlist", wishlist: user.wishlist });
   } catch (error) {

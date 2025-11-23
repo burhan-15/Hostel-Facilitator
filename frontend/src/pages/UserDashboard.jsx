@@ -147,7 +147,7 @@ export default function UserDashboard() {
                     {reviews.map((rev) => (
                       <li
                         key={rev.reviewId}
-                        className="border bg-gray-700 border-gray-700 rounded-lg p-3 bg-gray-850"
+                        className="border border-gray-700 rounded-lg p-3 bg-gray-850"
                       >
                         <p><strong>Hostel:</strong> {rev.hostelName}</p>
                         <p><strong>Rating:</strong> {rev.rating} ⭐</p>
@@ -165,11 +165,11 @@ export default function UserDashboard() {
                     {questions.map((q) => (
                       <li
                         key={q._id}
-                        className="border bg-gray-700 border-gray-700 rounded-lg p-3 bg-gray-850"
+                        className="border border-gray-700 rounded-lg p-3 bg-gray-850"
                       >
                         <p><strong>Hostel:</strong> {q.hostelName}</p>
                         <p className="text-gray-300">{q.question}</p>
-                        <p className="text-gray-300">{q.answer ? `Ans: ${q.answer}` : "Not Answered Yet"}</p>
+                        {q.answer ? <p className="text-gray-300 " ><strong>Answer:</strong> {q.answer} </p>: <p className="text-yellow-300 " ><strong>Status:</strong> Not Answered Yet</p>}
                       </li>
                     ))}
                   </ul>
