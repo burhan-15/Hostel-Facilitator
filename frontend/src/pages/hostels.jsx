@@ -3,8 +3,8 @@ import HostelCard from "../Components/hostelcard";
 import { getHostels } from "../services/hostelService";
 
 export default function Hostels() {
-  const [hostels, setHostels] = useState([]); 
-  const [filteredHostels, setFilteredHostels] = useState([]); 
+  const [hostels, setHostels] = useState([]);
+  const [filteredHostels, setFilteredHostels] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // FILTER STATES
@@ -26,14 +26,12 @@ export default function Hostels() {
   const searchInputRef = useRef(null);
 
   // AREA TYPEAHEAD STATES
+  const [availableAreas, setAvailableAreas] = useState([]);
   const [areaSuggestions, setAreaSuggestions] = useState([]);
   const [showAreaSuggestions, setShowAreaSuggestions] = useState(false);
   const [areaHighlightIndex, setAreaHighlightIndex] = useState(-1);
   const areaInputRef = useRef(null);
   const areaSuggestionsRef = useRef(null);
-
-  const [availableAreas, setAvailableAreas] = useState([]);
-
 
   // LOAD HOSTELS INITIALLY
   useEffect(() => {
@@ -44,11 +42,14 @@ export default function Hostels() {
         setHostels(data);
         setFilteredHostels(data);
 
-        const uniqueAreas = [...new Set(data.map(h => h.area).filter(Boolean))];
-        // Sort alphabetically
-        uniqueAreas.sort();
-        setAvailableAreas(uniqueAreas);
+        // Extract unique areas
+        const uniqueAreas = [
+          ...new Set(
+            data.map((h) => h.area).filter((a) => typeof a === "string")
+          ),
+        ].sort();
 
+        setAvailableAreas(uniqueAreas);
       } catch (err) {
         console.error(err);
       } finally {
@@ -59,11 +60,12 @@ export default function Hostels() {
 
   // CALCULATE AVG RATING
   const calcRating = (reviews) => {
-    if (!reviews || reviews.length === 0) return 0;
-    return (
-      reviews.reduce((sum, r) => sum + Number(r.rating || 0), 0) /
-      reviews.length
+    if (!Array.isArray(reviews) || reviews.length === 0) return 0;
+    const total = reviews.reduce(
+      (sum, r) => sum + Number(r?.rating || 0),
+      0
     );
+    return total / reviews.length;
   };
 
   // APPLY FILTERS BUTTON LOGIC
@@ -71,15 +73,23 @@ export default function Hostels() {
     let result = [...hostels];
 
     if (gender) result = result.filter((h) => h.gender === gender);
-    if (area) result = result.filter((h) => h.area.toLowerCase() === area.toLowerCase());
-    if (profession) result = result.filter((h) => h.profession === profession);
+
+    if (area)
+      result = result.filter(
+        (h) => h.area?.toLowerCase() === area.toLowerCase()
+      );
+
+    if (profession)
+      result = result.filter((h) => h.profession === profession);
 
     result = result.filter(
       (h) => h.rent >= minRent && h.rent <= maxRent
     );
 
     if (minRating) {
-      result = result.filter((h) => calcRating(h.reviews) >= Number(minRating));
+      result = result.filter(
+        (h) => calcRating(h.reviews) >= Number(minRating)
+      );
     }
 
     setFilteredHostels(result);
@@ -95,28 +105,31 @@ export default function Hostels() {
     setFilteredHostels(hostels);
   };
 
-  // LIVE SEARCH (INDEPENDENT)
+  // LIVE SEARCH (Independent)
   useEffect(() => {
-    if (!searchText.trim()) {
+    const q = searchText?.trim()?.toLowerCase() || "";
+
+    if (!q) {
       setSearchResults([]);
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
-    const q = searchText.toLowerCase();
-
     const matches = hostels.filter((h) =>
-      (h.name || "").toLowerCase().includes(q)
+      h.name?.toLowerCase().includes(q)
     );
 
-    setSuggestions(matches.slice(0, 6).map((m) => ({ name: m.name, id: m._id })));
+    setSuggestions(
+      matches.slice(0, 6).map((m) => ({ name: m.name, id: m._id }))
+    );
+
     setSearchResults(matches);
     setShowSuggestions(true);
   }, [searchText, hostels]);
 
   const handleSearchKeyDown = (e) => {
-    if (!showSuggestions) return;
+    if (!showSuggestions || suggestions.length === 0) return;
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -137,38 +150,44 @@ export default function Hostels() {
   };
 
   const handleSuggestionClick = (name) => {
-    setSearchText(name);
+    setSearchText(name || "");
+    const q = name?.toLowerCase() || "";
+
     const matches = hostels.filter((h) =>
-      (h.name || "").toLowerCase().includes(name.toLowerCase())
+      h.name?.toLowerCase().includes(q)
     );
     setSearchResults(matches);
     setShowSuggestions(false);
   };
 
   const handleSearchClick = () => {
+    const q = searchText?.toLowerCase() || "";
+
     const matches = hostels.filter((h) =>
-      (h.name || "").toLowerCase().includes(searchText.toLowerCase())
+      h.name?.toLowerCase().includes(q)
     );
+
     setSearchResults(matches);
     setShowSuggestions(false);
   };
 
   // AREA TYPEAHEAD LOGIC
   useEffect(() => {
-    if (!area.trim()) {
+    const q = area?.trim()?.toLowerCase() || "";
+
+    if (!q) {
       setAreaSuggestions([]);
       setShowAreaSuggestions(false);
       return;
     }
 
-    const q = area.toLowerCase();
     const matches = availableAreas.filter((a) =>
       a.toLowerCase().includes(q)
     );
 
     setAreaSuggestions(matches);
     setShowAreaSuggestions(true);
-  }, [area]);
+  }, [area, availableAreas]);
 
   const handleAreaKeyDown = (e) => {
     if (!showAreaSuggestions) return;
@@ -198,12 +217,12 @@ export default function Hostels() {
 
   // WHICH HOSTELS TO SHOW?
   const shownHostels =
-    searchText.trim()
+    searchText?.trim()
       ? searchResults.filter((h) => h.status === "approved")
       : filteredHostels.filter((h) => h.status === "approved");
 
-  // UI
-  if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
+  if (loading)
+    return <p className="text-white text-center mt-10">Loading...</p>;
 
   return (
     <div className="bg-gray-900 min-h-screen p-8">
@@ -219,7 +238,7 @@ export default function Hostels() {
             type="text"
             value={searchText}
             onChange={(e) => {
-              setSearchText(e.target.value);
+              setSearchText(e.target.value || "");
               setHighlightIndex(-1);
             }}
             onKeyDown={handleSearchKeyDown}
@@ -227,7 +246,6 @@ export default function Hostels() {
             className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 placeholder-gray-400 pr-12"
           />
 
-          {/* SEARCH BUTTON */}
           <button
             onClick={handleSearchClick}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded bg-indigo-600"
@@ -244,7 +262,6 @@ export default function Hostels() {
             </svg>
           </button>
 
-          {/* SEARCH SUGGESTIONS */}
           {showSuggestions && suggestions.length > 0 && (
             <div
               ref={suggestionsRef}
@@ -256,9 +273,9 @@ export default function Hostels() {
                   onClick={() => handleSuggestionClick(s.name)}
                   className={`w-full text-left px-4 py-2 ${
                     i === highlightIndex
-                      ? "bg-[#0a1a3a] text-white"
-                      : "hover:bg-gray-700 text-white"
-                  }`}
+                      ? "bg-[#0a1a3a]"
+                      : "hover:bg-gray-700"
+                  } text-white`}
                 >
                   {s.name}
                 </button>
@@ -287,7 +304,7 @@ export default function Hostels() {
             </select>
           </div>
 
-          {/* Area TypeAhead */}
+          {/* Area Typeahead */}
           <div className="relative">
             <label className="text-gray-300">Area</label>
             <input
@@ -295,7 +312,7 @@ export default function Hostels() {
               type="text"
               value={area}
               onChange={(e) => {
-                setArea(e.target.value);
+                setArea(e.target.value || "");
                 setAreaHighlightIndex(-1);
               }}
               onKeyDown={handleAreaKeyDown}
@@ -314,9 +331,9 @@ export default function Hostels() {
                     onClick={() => selectArea(a)}
                     className={`w-full text-left px-4 py-2 ${
                       i === areaHighlightIndex
-                        ? "bg-[#0a1a3a] text-white"
-                        : "hover:bg-gray-700 text-white"
-                    }`}
+                        ? "bg-[#0a1a3a]"
+                        : "hover:bg-gray-700"
+                    } text-white`}
                   >
                     {a}
                   </button>
@@ -356,7 +373,7 @@ export default function Hostels() {
             </select>
           </div>
 
-          {/* Rent Range Slider */}
+          {/* Rent Slider */}
           <div className="max-w-sm">
             <label className="text-gray-300 font-medium">Rent Range</label>
 
@@ -369,25 +386,20 @@ export default function Hostels() {
               className="relative mt-6 h-3 cursor-pointer"
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;           
-                const percentage = clickX / rect.width;        
-                let value = Math.round((percentage * 100000) / 500) * 500;
+                const clickX = e.clientX - rect.left;
+                const percent = clickX / rect.width;
+                let value = Math.round((percent * 100000) / 500) * 500;
                 value = Math.max(0, Math.min(100000, value));
 
-                // Move nearest thumb
-                const isCloserToMin = Math.abs(value - minRent) < Math.abs(value - maxRent);
+                const nearMin =
+                  Math.abs(value - minRent) < Math.abs(value - maxRent);
 
-                if (isCloserToMin) {
-                  if (value <= maxRent) setMinRent(value);
-                } else {
-                  if (value >= minRent) setMaxRent(value);
-                }
+                if (nearMin && value <= maxRent) setMinRent(value);
+                else if (!nearMin && value >= minRent) setMaxRent(value);
               }}
             >
-              {/* Track */}
               <div className="absolute w-full h-3 bg-gray-700 rounded-full"></div>
 
-              {/* Highlighted selection */}
               <div
                 className="absolute h-3 bg-indigo-500 rounded-full transition-all duration-150"
                 style={{
@@ -396,7 +408,7 @@ export default function Hostels() {
                 }}
               ></div>
 
-              {/* MIN range input */}
+              {/* MIN slider */}
               <input
                 type="range"
                 min="0"
@@ -404,20 +416,16 @@ export default function Hostels() {
                 step="500"
                 value={minRent}
                 onChange={(e) => {
-                  const newVal = Number(e.target.value);
-                  if (newVal <= maxRent) setMinRent(newVal);
+                  const v = Number(e.target.value);
+                  if (v <= maxRent) setMinRent(v);
                 }}
                 className="absolute w-full appearance-none bg-transparent pointer-events-none
                 [&::-webkit-slider-thumb]:pointer-events-auto
-                [&::-webkit-slider-thumb]:h-5
-                [&::-webkit-slider-thumb]:w-5
-                [&::-webkit-slider-thumb]:rounded-full
-                [&::-webkit-slider-thumb]:bg-white
-                [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(255,255,255,0.7)]
-                [&::-webkit-slider-thumb]:cursor-pointer"
+                [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
               />
 
-              {/* MAX range input */}
+              {/* MAX slider */}
               <input
                 type="range"
                 min="0"
@@ -425,17 +433,13 @@ export default function Hostels() {
                 step="500"
                 value={maxRent}
                 onChange={(e) => {
-                  const newVal = Number(e.target.value);
-                  if (newVal >= minRent) setMaxRent(newVal);
+                  const v = Number(e.target.value);
+                  if (v >= minRent) setMaxRent(v);
                 }}
                 className="absolute w-full appearance-none bg-transparent pointer-events-none
                 [&::-webkit-slider-thumb]:pointer-events-auto
-                [&::-webkit-slider-thumb]:h-5
-                [&::-webkit-slider-thumb]:w-5
-                [&::-webkit-slider-thumb]:rounded-full
-                [&::-webkit-slider-thumb]:bg-white
-                [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(255,255,255,0.7)]
-                [&::-webkit-slider-thumb]:cursor-pointer"
+                [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
               />
             </div>
           </div>
