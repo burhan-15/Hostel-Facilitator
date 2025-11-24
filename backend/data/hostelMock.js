@@ -38,6 +38,20 @@ export const hostels = [
           "Yes, we have a 24/7 generator backup for all rooms and common areas.",
       },
     ],
+
+    
+    faqs: [
+      {
+        id: 1,
+        question: "Are visitors allowed?",
+        answer: "Yes, visitors are allowed during daytime hours with security permission.",
+      },
+      {
+        id: 2,
+        question: "Is Wi-Fi unlimited?",
+        answer: "Yes, high-speed unlimited Wi-Fi is included.",
+      },
+    ],
   },
 
   {
@@ -63,13 +77,22 @@ export const hostels = [
     status: "approved",
     views: 180,
     shortlists: 30,
-    nearbyUniversities: [
-      "SZABIST",
-      "Fazaia Medical College",
-      "NUML",
-    ],
+    nearbyUniversities: ["SZABIST", "Fazaia Medical College", "NUML"],
     reviews: [],
     questions: [],
+
+    faqs: [
+      {
+        id: 1,
+        question: "Is housekeeping included?",
+        answer: "Yes, daily housekeeping is included in the rent.",
+      },
+      {
+        id: 2,
+        question: "Are corporate discounts available?",
+        answer: "Yes, discounts are available for long-term stays.",
+      },
+    ],
   },
 
   {
@@ -104,6 +127,19 @@ export const hostels = [
         answer: "The in-time is 10 PM sharp for all residents.",
       },
     ],
+
+    faqs: [
+      {
+        id: 1,
+        question: "Is CCTV available everywhere?",
+        answer: "Yes, the entire facility is monitored 24/7.",
+      },
+      {
+        id: 2,
+        question: "Are meals compulsory?",
+        answer: "No, the mess is optional and can be subscribed monthly.",
+      },
+    ],
   },
 
   {
@@ -121,9 +157,25 @@ export const hostels = [
     status: "pending",
     views: 0,
     shortlists: 0,
-    nearbyUniversities: ["Shifa College of Medicine", "Riphah International University"],
+    nearbyUniversities: [
+      "Shifa College of Medicine",
+      "Riphah International University",
+    ],
     reviews: [],
     questions: [],
+
+    faqs: [
+      {
+        id: 1,
+        question: "Is kitchen usage allowed?",
+        answer: "Yes, each room has a private kitchenette.",
+      },
+      {
+        id: 2,
+        question: "Are guests allowed overnight?",
+        answer: "No, overnight guests are not allowed.",
+      },
+    ],
   },
 
   {
@@ -141,7 +193,11 @@ export const hostels = [
     status: "approved",
     views: 450,
     shortlists: 85,
-    nearbyUniversities: ["Institute of Space Technology (IST)", "Air University", "PIEAS"],
+    nearbyUniversities: [
+      "Institute of Space Technology (IST)",
+      "Air University",
+      "PIEAS",
+    ],
     reviews: [
       {
         id: 204,
@@ -162,6 +218,19 @@ export const hostels = [
         userId: 1,
         text: "Do you provide transport to university?",
         answer: null,
+      },
+    ],
+
+    faqs: [
+      {
+        id: 1,
+        question: "Is laundry free?",
+        answer: "Laundry is available but charged separately.",
+      },
+      {
+        id: 2,
+        question: "How far is IST from here?",
+        answer: "The Institute of Space Technology is about 10 minutes away.",
       },
     ],
   },

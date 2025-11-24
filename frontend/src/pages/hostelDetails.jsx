@@ -1,11 +1,9 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuth } from "../Components/AuthContext";
-import { getHostelById, addQuestion, answerQuestion } from "../services/hostelService";
-import { addReview, deleteReview } from "../services/hostelService";
+import { getHostelById, addQuestion } from "../services/hostelService";
+import { addReview } from "../services/hostelService";
 import { incrementViewCount } from "../services/hostelService";
-import { getHostelFAQs } from "../services/ownerFaqService";
-
 
 export default function HostelDetail() {
   const { id } = useParams();
@@ -26,14 +24,15 @@ export default function HostelDetail() {
           setLoading(false);
           return;
         }
+
         const hostelData = await getHostelById(id);
         if (hostelData) {
           setHostel(hostelData);
           setReviews(hostelData.reviews || []);
           setQuestions(hostelData.questions || []);
+          setFaqs(hostelData.faqs || []); // ✅ get FAQs directly from hostel object
+
           incrementViewCount(id).catch(err => console.error("Failed to increment views:", err));
-          const faqsData = await getHostelFAQs(id);
-          setFaqs(faqsData || []);
         } else {
           console.error("Hostel data is null");
         }
@@ -44,8 +43,8 @@ export default function HostelDetail() {
         setLoading(false);
       }
     };
+
     fetchHostel();
-    
   }, [id]);
 
   if (loading) {
@@ -103,19 +102,6 @@ export default function HostelDetail() {
     } catch (error) {
       console.error("Error adding question:", error);
       alert(error.response?.data?.message || "Failed to add question");
-    }
-  };
-
-  const handleRemoveReview = async (reviewId) => {
-    try {
-      const result = await deleteReview(id, reviewId);
-      if (result.success) {
-        setReviews(reviews.filter((r) => r._id !== reviewId && r.id !== reviewId));
-        setHostel(result.hostel);
-      }
-    } catch (error) {
-      console.error("Error removing review:", error);
-      alert(error.response?.data?.message || "Failed to remove review");
     }
   };
 
@@ -239,7 +225,7 @@ export default function HostelDetail() {
                   Questions
                 </button>
 
-                  <button
+                <button
                   className={`py-4 px-1 border-b-2 font-medium ${
                     selectedTab === "faqs"
                       ? "text-slate-300 border-slate-500"
@@ -289,15 +275,6 @@ export default function HostelDetail() {
                               </div>
                               <p className="ml-3 font-semibold text-white">{userName}</p>
                             </div>
-
-                            {currentUser?.role === "admin" && (
-                              <button
-                                onClick={() => handleRemoveReview(reviewId)}
-                                className="text-xs text-red-400 hover:text-red-300"
-                              >
-                                Remove
-                              </button>
-                            )}
                           </div>
                           <p className="text-gray-300">{review.text}</p>
                         </div>
@@ -351,25 +328,9 @@ export default function HostelDetail() {
                               <p className="text-sm text-gray-400">Answered by Hostel Owner</p>
                             </div>
                           ) : isOwner ? (
-                            <AnswerForm 
-                              hostelId={id} 
-                              questionId={questionId}
-                              onAnswer={(answer) => {
-                                const handleAnswer = async () => {
-                                  try {
-                                    const result = await answerQuestion(id, questionId, answer);
-                                    if (result.success) {
-                                      setQuestions(result.hostel.questions || []);
-                                      setHostel(result.hostel);
-                                    }
-                                  } catch (error) {
-                                    console.error("Error answering question:", error);
-                                    alert(error.response?.data?.message || "Failed to answer question");
-                                  }
-                                };
-                                handleAnswer();
-                              }}
-                            />
+                            <p className="mt-2 pl-4 text-sm text-gray-500 italic">
+                              Awaiting your answer...
+                            </p>
                           ) : (
                             <p className="mt-2 pl-4 text-sm text-gray-500 italic">
                               Awaiting answer from owner...
@@ -482,34 +443,6 @@ function QuestionForm({ onSubmit }) {
         className="mt-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700"
       >
         Submit Question
-      </button>
-    </div>
-  );
-}
-
-// --- Answer Form ---
-function AnswerForm({ hostelId, questionId, onAnswer }) {
-  const [answer, setAnswer] = useState("");
-
-  return (
-    <div className="mt-2">
-      <textarea
-        rows="2"
-        className="w-full p-2 border border-gray-600 bg-gray-800 text-white rounded-md"
-        placeholder="Type your answer here..."
-        value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
-      />
-      <button
-        onClick={() => {
-          if (answer.trim()) {
-            onAnswer(answer);
-            setAnswer("");
-          }
-        }}
-        className="mt-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 text-sm"
-      >
-        Submit Answer
       </button>
     </div>
   );

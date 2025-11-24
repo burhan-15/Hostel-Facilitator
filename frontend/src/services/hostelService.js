@@ -153,3 +153,36 @@ export const incrementViewCount = async (hostelId) => {
   }
 };
 
+// Add a new FAQ (owner only)
+export const addFaq = async (hostelId, question, answer) => {
+  try {
+    const res = await API.post(`/hostels/${hostelId}/faqs`, { question, answer });
+    return res.data;
+  } catch (error) {
+    console.error("Error adding FAQ:", error);
+    throw error;
+  }
+};
+
+// Update an existing FAQ (owner only)
+export const updateFaq = async (hostelId, faqId, question, answer) => {
+  try {
+    const res = await API.patch(`/hostels/${hostelId}/faqs/${faqId}`, { question, answer });
+    return res.data;
+  } catch (error) {
+    console.error("Error updating FAQ:", error);
+    throw error;
+  }
+};
+
+// Delete an FAQ (owner only)
+export const deleteFaq = async (hostelId, faqId) => {
+  try {
+    const res = await API.delete(`/hostels/${hostelId}/faqs/${faqId}`);
+    return res.data;
+  } catch (error) {
+    console.error("Error deleting FAQ:", error);
+    throw error;
+  }
+};
+

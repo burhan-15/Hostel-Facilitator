@@ -59,7 +59,7 @@ const hostelSchema = new mongoose.Schema(
         "Fazaia Medical College",
         "Shifa College of Medicine",
         "HBS Medical College",
-        "Islamabad Medical & Dental College (IMDC)"
+        "Islamabad Medical & Dental College (IMDC)",
       ],
       default: [],
     },
@@ -79,11 +79,13 @@ const hostelSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+
     reviews: [
       {
         userId: {
@@ -108,6 +110,7 @@ const hostelSchema = new mongoose.Schema(
         },
       },
     ],
+
     questions: [
       {
         userId: {
@@ -132,6 +135,29 @@ const hostelSchema = new mongoose.Schema(
         answeredAt: {
           type: Date,
           default: null,
+        },
+      },
+    ],
+
+    faqs: [
+      {
+        question: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        answer: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+        updatedAt: {
+          type: Date,
+          default: Date.now,
         },
       },
     ],

@@ -52,7 +52,8 @@ export const getHostelById = async (req, res) => {
       });
     }
 
-    if (req.user?.role !== "admin" && hostel.status !== "approved") {
+
+    if ((req.user?.role !== "admin" || req.user?.role !== "owner") && hostel.status !== "approved") {
       return res.status(403).json({
         success: false,
         message: "Hostel not available",
@@ -74,10 +75,8 @@ export const createHostel = async (req, res) => {
   try {
     const { 
       name, area, rent, gender, profession, description, 
-      image, amenities, universitiesNearby 
+      image, amenities, universitiesNearby, faqs 
     } = req.body;
-
-    console.log(req.body);
 
     if (!name || !area || !rent || !gender || !profession || !description) {
       return res.status(400).json({
@@ -95,10 +94,8 @@ export const createHostel = async (req, res) => {
       description,
       image: image || "https://placehold.co/600x400/4f46e5/ffffff?text=Hostel+Image",
       amenities: amenities || [],
-
-      // ✅ FIXED: MUST MATCH SCHEMA EXACTLY
       nearbyUniversities: universitiesNearby || [],
-
+      faqs: faqs || [],  
       ownerId: req.user.userId,
       status: "pending",
     });
@@ -116,7 +113,6 @@ export const createHostel = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 // Update hostel
 export const updateHostel = async (req, res) => {
@@ -140,9 +136,8 @@ export const updateHostel = async (req, res) => {
       });
     }
 
-    delete updates.status; // prevent status tampering
+    delete updates.status;
 
-    // Allow nearbyUniversities update
     if (updates.nearbyUniversities && !Array.isArray(updates.nearbyUniversities)) {
       return res.status(400).json({
         success: false,
@@ -282,7 +277,6 @@ export const increaseViewCount = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Increment views by 1
     const hostel = await Hostel.findByIdAndUpdate(
       id,
       { $inc: { views: 0.5 } },
@@ -302,6 +296,76 @@ export const increaseViewCount = async (req, res) => {
     });
   } catch (error) {
     console.error("Increase view count error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Add FAQ
+export const addFaq = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { question, answer } = req.body;
+
+    const hostel = await Hostel.findById(id);
+    if (!hostel) return res.status(404).json({ success: false, message: "Hostel not found" });
+
+    if (hostel.ownerId.toString() !== req.user.userId && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    hostel.faqs.push({ question, answer });
+    await hostel.save();
+
+    res.status(200).json({ success: true, message: "FAQ added", faqs: hostel.faqs });
+  } catch (error) {
+    console.error("Add FAQ error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Update FAQ
+export const updateFaq = async (req, res) => {
+  try {
+    const { id, faqId } = req.params;
+    const { question, answer } = req.body;
+
+    const hostel = await Hostel.findById(id);
+    if (!hostel) return res.status(404).json({ success: false, message: "Hostel not found" });
+
+    const faq = hostel.faqs.id(faqId);
+    if (!faq) return res.status(404).json({ success: false, message: "FAQ not found" });
+
+    if (hostel.ownerId.toString() !== req.user.userId && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    faq.question = question ?? faq.question;
+    faq.answer = answer ?? faq.answer;
+
+    await hostel.save();
+
+    res.status(200).json({ success: true, message: "FAQ updated", faqs: hostel.faqs });
+  } catch (error) {
+    console.error("Update FAQ error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Delete FAQ
+export const deleteFaq = async (req, res) => {
+  try {
+    const { id, faqId } = req.params;
+
+    const hostel = await Hostel.findById(id);
+    if (!hostel) return res.status(404).json({ success: false, message: "Hostel not found" });
+
+    hostel.faqs = hostel.faqs.filter((f) => f._id.toString() !== faqId);
+
+    await hostel.save();
+
+    res.status(200).json({ success: true, message: "FAQ deleted", faqs: hostel.faqs });
+  } catch (error) {
+    console.error("Delete FAQ error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

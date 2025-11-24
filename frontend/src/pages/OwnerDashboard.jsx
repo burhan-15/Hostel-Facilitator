@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../Components/AuthContext";
 import { Navigate } from "react-router-dom";
+import { Eye, Heart } from "lucide-react";
+
 
 import AddHostelModal from "../Components/addHostelModal";
 import EditHostelModal from "../Components/EditHostelModal";
+import ManageFaqModal from "../Components/ManageFaqModal";
 import { getMyHostels, deleteHostel, answerQuestion } from "../services/hostelService";
 
 export default function OwnerDashboard() {
@@ -14,8 +17,8 @@ export default function OwnerDashboard() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editHostel, setEditHostel] = useState(null);
-
-  // Only owners allowed
+  const [showFaqModal, setShowFaqModal] = useState(false); 
+  const [faqHostelId, setFaqHostelId] = useState(null);
 
   useEffect(() => {
     const fetchHostels = async () => {
@@ -35,7 +38,6 @@ export default function OwnerDashboard() {
     return <Navigate to="/login" replace />;
   }
 
-  // Extract unanswered questions
   const unansweredQuestions = hostels.flatMap((h) =>
     (h.questions || [])
       .filter((q) => !q.answer)
@@ -47,10 +49,8 @@ export default function OwnerDashboard() {
       }))
   );
 
-  // Delete hostel
   const handleDeleteHostel = async (id) => {
     if (!window.confirm("Are you sure you want to delete this hostel?")) return;
-    
     try {
       await deleteHostel(id);
       setHostels((prev) => prev.filter((h) => (h._id || h.id) !== id));
@@ -60,14 +60,11 @@ export default function OwnerDashboard() {
     }
   };
 
-  // Submit answer to a question
   const submitAnswer = async (hostelId, questionId, text) => {
     if (!text.trim()) return;
-
     try {
       const result = await answerQuestion(hostelId, questionId, text);
       if (result.success) {
-        // Refresh hostels
         const data = await getMyHostels();
         setHostels(data);
       }
@@ -78,20 +75,16 @@ export default function OwnerDashboard() {
   };
 
   const handleAddHostel = async () => {
-    // Refresh hostels after adding
     const data = await getMyHostels();
     setHostels(data);
   };
 
   const handleUpdateHostel = async () => {
-    // Refresh hostels after updating
     const data = await getMyHostels();
     setHostels(data);
   };
 
-  if (loading) {
-    return <p className="text-white text-center mt-10">Loading...</p>;
-  }
+  if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
 
   return (
     <div className="bg-gray-900 min-h-screen text-white p-6">
@@ -126,12 +119,11 @@ export default function OwnerDashboard() {
                         {h.status.toUpperCase()}
                       </span>
                     </p>
-                    <p className="text-sm text-gray-400">{h.area}</p>
-                    <p className="text-sm text-gray-400">Views: {h.views}</p>
-                    <p className="text-sm text-gray-400">Shortlists: {h.shortlists}</p>
+                    <p className="text-sm text-gray-400 my-1">{h.area}</p>
+                    <p className="text-sm text-gray-400 flex items-center "><Eye className="w-4 h-4 text-white inline mr-2" /> {h.views} <Heart className="w-4 h-4 text-white inline mx-2" fill = "white" /> {h.shortlists}</p>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex flex-wrap items-center space-x-2 gap-2">
                     <button
                       onClick={() => {
                         setEditHostel(h);
@@ -148,6 +140,19 @@ export default function OwnerDashboard() {
                     >
                       Delete
                     </button>
+
+                    {h.status === "approved" && (
+                      <button
+                        onClick={() => {
+                          setFaqHostelId(hostelId);
+                          setShowFaqModal(true);
+                        }}
+                        className="text-sm px-3 py-1 bg-purple-600 rounded-md hover:bg-purple-700"
+                      >
+                        Manage FAQs
+                      </button>
+                    )}
+                    
                   </div>
                 </div>
               );
@@ -181,7 +186,14 @@ export default function OwnerDashboard() {
           />
         )}
 
-
+        {showFaqModal && faqHostelId && (
+          <ManageFaqModal
+            isOpen={showFaqModal}
+            onClose={() => setShowFaqModal(false)}
+            hostelId={faqHostelId}
+            currentUser={currentUser}
+          />
+        )}
 
         {/* --- Pending Questions Section --- */}
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
@@ -206,7 +218,6 @@ export default function OwnerDashboard() {
   );
 }
 
-/* ===================== Pending Question Component ===================== */
 
 function PendingQuestionCard({ q, submitAnswer }) {
   const [text, setText] = useState("");
@@ -232,7 +243,7 @@ function PendingQuestionCard({ q, submitAnswer }) {
           onClick={async () => {
             if (text.trim() !== "") {
               await submitAnswer(q.hostelId, q.questionId, text.trim());
-              setText(""); // clear after submit
+              setText("");
             }
           }}
         >
