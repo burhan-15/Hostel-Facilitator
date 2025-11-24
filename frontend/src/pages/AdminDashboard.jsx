@@ -7,10 +7,12 @@ import {
   getAllHostels,
   approveHostel,
   rejectHostel,
+  approveBoost,
+  rejectBoost,
   deleteReview,
 } from "../services/hostelService";
 
-// FAQ SERVICE (FIXED)
+// FAQ SERVICE
 import {
   getFAQs,
   createFAQ,
@@ -40,9 +42,9 @@ export default function AdminDashboard() {
         const hostelsData = await getAllHostels();
         setHostels(hostelsData);
 
+        // placeholder numbers
         setUsers({ users: 10, owners: 5 });
 
-        // FIX: Always get ONLY array here
         const faqData = await getFAQs();
         setFaqs(Array.isArray(faqData) ? faqData : []);
       } catch (error) {
@@ -71,8 +73,8 @@ export default function AdminDashboard() {
       (h.reviews || []).map((r) => ({
         ...r,
         hostelName: h.name,
-        hostelId: h._id || h.id,
-        reviewId: r._id || r.id,
+        hostelId: h._id,
+        reviewId: r._id,
       }))
     )
     .slice(0, 5);
@@ -85,20 +87,73 @@ export default function AdminDashboard() {
         prev.map((h) => (h._id === id ? { ...h, status: "approved" } : h))
       );
     } catch (e) {
-      alert("Failed");
+      console.error(e);
+      alert("Failed to approve hostel");
     }
   };
 
-  const handleRemoveHostel = async (id) => {
+  const handleRejectHostel = async (id) => {
     if (!window.confirm("Reject this hostel?")) return;
     try {
       await rejectHostel(id);
       setHostels((prev) => prev.filter((h) => h._id !== id));
     } catch (e) {
-      alert("Failed");
+      console.error(e);
+      alert("Failed to reject hostel");
     }
   };
 
+  // ---------------- BOOST ACTIONS ----------------
+  const handleApproveBoost = async (id) => {
+    try {
+      // backend returns updated hostel or updated boost object
+      const updatedBoost = await approveBoost(id);
+
+      setHostels((prev) =>
+        prev.map((h) =>
+          h._id === id
+            ? {
+                ...h,
+                boost: {
+                  ...h.boost,
+                  ...updatedBoost.boost, // <-- FIX: replace with the latest backend boost object
+                },
+              }
+            : h
+        )
+      );
+    } catch (e) {
+      console.error(e);
+      alert("Failed to approve boost");
+    }
+  };
+
+
+  const handleRejectBoost = async (id) => {
+    if (!window.confirm("Remove this boost request?")) return;
+    try {
+      await rejectBoost(id);
+      setHostels((prev) =>
+        prev.map((h) =>
+          h._id === id
+            ? {
+                ...h,
+                boost: {
+                  ...h.boost,
+                  status: "rejected",
+                  isActive: false,
+                },
+              }
+            : h
+        )
+      );
+    } catch (e) {
+      console.error(e);
+      alert("Failed to remove boost");
+    }
+  };
+
+  // ---------------- REVIEW DELETE ----------------
   const handleRemoveReview = async (hostelId, reviewId) => {
     try {
       await deleteReview(hostelId, reviewId);
@@ -110,7 +165,8 @@ export default function AdminDashboard() {
         )
       );
     } catch (e) {
-      alert("Failed");
+      console.error(e);
+      alert("Failed to remove review");
     }
   };
 
@@ -130,9 +186,7 @@ export default function AdminDashboard() {
           answer: faqAnswer,
         });
 
-        setFaqs((prev) =>
-          prev.map((f) => (f._id === editingId ? updated : f))
-        );
+        setFaqs((prev) => prev.map((f) => (f._id === editingId ? updated : f)));
       } else {
         const newFAQ = await createFAQ({
           question: faqQuestion,
@@ -144,6 +198,7 @@ export default function AdminDashboard() {
 
       resetFAQForm();
     } catch (error) {
+      console.error(error);
       alert("Failed to save FAQ");
     }
   };
@@ -160,6 +215,7 @@ export default function AdminDashboard() {
       setFaqs((prev) => prev.filter((f) => f._id !== confirmDeleteId));
       setConfirmDeleteId(null);
     } catch (error) {
+      console.error(error);
       alert("Delete failed");
     }
   };
@@ -168,7 +224,6 @@ export default function AdminDashboard() {
   return (
     <div className="bg-gray-900 min-h-screen text-white p-6">
       <div className="max-w-6xl mx-auto space-y-8">
-
         {/* ------------ STATS ------------- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard value={hostels.length} label="Total Hostels" />
@@ -202,7 +257,7 @@ export default function AdminDashboard() {
                     </button>
 
                     <button
-                      onClick={() => handleRemoveHostel(h._id)}
+                      onClick={() => handleRejectHostel(h._id)}
                       className="ml-2 px-3 py-1 bg-red-600 rounded"
                     >
                       Reject
@@ -210,6 +265,77 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               ))
+            )}
+          </div>
+        </div>
+
+        {/* ------------ BOOST REQUESTS (UPDATED) ------------- */}
+        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <h3 className="text-2xl font-bold mb-4">
+            Boost Requests ({hostels.filter((h) => h.boost.isActive).length})
+          </h3>
+
+          <div className="space-y-3">
+            {hostels.filter((h) => h.boost.isActive).length === 0 ? (
+              <p className="text-gray-400">No boost activity.</p>
+            ) : (
+              hostels
+                .filter((h) => h.boost.isActive)
+                .map((h) => (
+                  <div
+                    key={h._id}
+                    className="flex justify-between items-center p-3 bg-gray-700 rounded-lg"
+                  >
+                    <div>
+                      <p className="font-semibold">{h.name}</p>
+
+                      <p className="text-gray-400 text-sm">
+                        Duration: {h.boost?.durationDays} days
+                      </p>
+
+                      <p className="text-gray-400 text-sm capitalize">
+                        Status:{" "}
+                        <span
+                          className={
+                            h.boost.status === "approved"
+                              ? "text-green-400"
+                              : h.boost.status === "pending"
+                              ? "text-yellow-400"
+                              : "text-red-400"
+                          }
+                        >
+                          {h.boost.status}
+                        </span>
+                      </p>
+
+                      {h.boost.status === "approved" && (
+                        <p className="text-gray-400 text-sm">
+                          {new Date(h.boost.startDate).toLocaleDateString()} →{" "}
+                          {new Date(h.boost.endDate).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* ACTION BUTTONS */}
+                    <div className="flex gap-2">
+                      {h.boost.status === "pending" && (
+                        <button
+                          onClick={() => handleApproveBoost(h._id)}
+                          className="px-3 py-1 bg-green-600 rounded"
+                        >
+                          Approve
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => handleRejectBoost(h._id)}
+                        className="px-3 py-1 bg-red-600 rounded"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))
             )}
           </div>
         </div>
@@ -301,6 +427,7 @@ export default function AdminDashboard() {
 
                   <div className="flex gap-6">
                     <button
+                      type="button"
                       className="w-[5rem] bg-blue-600 rounded"
                       onClick={() => startEditingFAQ(f)}
                     >
@@ -308,7 +435,8 @@ export default function AdminDashboard() {
                     </button>
 
                     <button
-                      className="w-[5rem]  bg-red-600 rounded"
+                      type="button"
+                      className="w-[5rem] bg-red-600 rounded"
                       onClick={() => setConfirmDeleteId(f._id)}
                     >
                       Delete

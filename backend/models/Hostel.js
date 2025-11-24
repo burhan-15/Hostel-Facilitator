@@ -40,7 +40,6 @@ const hostelSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-
     nearbyUniversities: {
       type: [String],
       enum: [
@@ -63,29 +62,24 @@ const hostelSchema = new mongoose.Schema(
       ],
       default: [],
     },
-
     views: {
       type: Number,
       default: 0,
     },
-
     shortlists: {
       type: Number,
       default: 0,
     },
-
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-
     status: {
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
-
     reviews: [
       {
         userId: {
@@ -110,7 +104,6 @@ const hostelSchema = new mongoose.Schema(
         },
       },
     ],
-
     questions: [
       {
         userId: {
@@ -138,7 +131,6 @@ const hostelSchema = new mongoose.Schema(
         },
       },
     ],
-
     faqs: [
       {
         question: {
@@ -161,6 +153,14 @@ const hostelSchema = new mongoose.Schema(
         },
       },
     ],
+
+    boost: {
+      isActive: { type: Boolean, default: false },
+      status: { type: String, enum: ["pending", "approved"], default: "pending" },
+      startDate: { type: Date },
+      endDate: { type: Date },
+      durationDays: { type: Number }, // new field to store requested boost duration
+    },
   },
   {
     timestamps: true,

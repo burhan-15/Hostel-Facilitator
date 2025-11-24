@@ -11,7 +11,10 @@ import {
   increaseViewCount,
   addFaq,
   updateFaq,
-  deleteFaq
+  deleteFaq,
+  requestBoost,
+  approveBoost,
+  rejectBoost,
 } from "../controllers/hostelController.js";
 
 import { authenticate, authorize } from "../middleware/auth.js";
@@ -38,6 +41,11 @@ router.get("/owner/my-hostels", authenticate, authorize("owner"), getHostelsByOw
 router.patch("/:id/approve", authenticate, authorize("admin"), approveHostel);
 router.patch("/:id/reject", authenticate, authorize("admin"), rejectHostel);
 
+// Boost routes
+router.post("/:id/boost", authenticate, authorize("owner"), requestBoost); // owner requests boost
+router.patch("/:id/boost/approve", authenticate, authorize("admin"), approveBoost); // admin approves boost
+router.patch("/:id/boost/reject", authenticate, authorize("admin"), rejectBoost); // admin rejects boost
+
 
 // Add FAQ
 router.post("/:id/faqs", authenticate, authorize("owner"), addFaq);
@@ -47,5 +55,7 @@ router.patch("/:id/faqs/:faqId", authenticate, authorize("owner"), updateFaq);
 
 // Delete FAQ
 router.delete("/:id/faqs/:faqId", authenticate, authorize("owner"), deleteFaq);
+
+
 
 export default router;

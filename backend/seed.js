@@ -14,9 +14,9 @@ await connectDB();
 
 const seedData = async () => {
   try {
+    // Clear old data
     await User.deleteMany();
     await Hostel.deleteMany();
-
     console.log("🧹 Old data cleared");
 
     // Hash passwords
@@ -27,42 +27,47 @@ const seedData = async () => {
       }))
     );
 
+    // Insert users
     const createdUsers = await User.insertMany(hashedUsers);
     console.log("👤 Users inserted");
 
-    // --- Map numeric IDs -> actual ObjectIds ---
+    // Map numeric IDs -> actual ObjectIds
     const userIdMap = {};
     createdUsers.forEach((u, index) => {
       userIdMap[index + 1] = u._id;
     });
 
-    // --- Fix numeric userIds in hostels and make them compatible with schema ---
+    // Fix hostels' ownerId, reviews, and questions
     const hostelsWithFixedIds = hostels.map((h) => ({
       ...h,
 
-      // Ensure ownerId is a valid ObjectId
-      ownerId: createdUsers[1]._id, // or modify based on your logic
+      // Map numeric ownerId to actual ObjectId
+      ownerId: userIdMap[h.ownerId],
 
-      // Replace review userIds with actual ObjectIds
+      // Map review userIds
       reviews:
         h.reviews?.map((r) => ({
           ...r,
           userId: userIdMap[r.userId],
         })) || [],
 
-      // Replace question userIds with actual ObjectIds
+      // Map question userIds
       questions:
         h.questions?.map((q) => ({
           ...q,
           userId: userIdMap[q.userId],
         })) || [],
 
-      // Ensure new fields exist (if missing)
+      // FAQs (keep as is)
+      faqs: h.faqs || [],
+
+      // Ensure other fields exist
       views: h.views ?? 0,
       shortlists: h.shortlists ?? 0,
-      universitiesNearby: h.universitiesNearby ?? [],
+      nearbyUniversities: h.nearbyUniversities ?? h.universitiesNearby ?? [],
     }));
 
+    // Insert hostels
     await Hostel.insertMany(hostelsWithFixedIds);
     console.log("🏠 Hostels inserted");
 

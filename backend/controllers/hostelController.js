@@ -22,9 +22,33 @@ export const getAllHostels = async (req, res) => {
       if (maxRent) filter.rent.$lte = Number(maxRent);
     }
 
-    const hostels = await Hostel.find(filter)
+    let hostels = await Hostel.find(filter)
       .populate("ownerId", "name email")
       .sort({ createdAt: -1 });
+
+    // ----------------- CUSTOM SORTING -----------------
+
+    hostels = hostels.sort((a, b) => {
+      const aBoost = a.boost?.status === "approved";
+      const bBoost = b.boost?.status === "approved";
+
+      // Priority 1: Boosted hostels first
+      if (aBoost && !bBoost) return -1;
+      if (!aBoost && bBoost) return 1;
+
+      // Priority 2: Higher rating
+      const aRating =
+        a.reviews?.length > 0
+          ? a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length
+          : 0;
+
+      const bRating =
+        b.reviews?.length > 0
+          ? b.reviews.reduce((s, r) => s + r.rating, 0) / b.reviews.length
+          : 0;
+
+      return bRating - aRating;
+    });
 
     res.status(200).json({
       success: true,
@@ -36,6 +60,7 @@ export const getAllHostels = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 // Get single hostel by ID
 export const getHostelById = async (req, res) => {
@@ -366,6 +391,101 @@ export const deleteFaq = async (req, res) => {
     res.status(200).json({ success: true, message: "FAQ deleted", faqs: hostel.faqs });
   } catch (error) {
     console.error("Delete FAQ error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const requestBoost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { durationDays } = req.body; // owner specifies number of days
+
+    const hostel = await Hostel.findById(id);
+    if (!hostel) return res.status(404).json({ success: false, message: "Hostel not found" });
+
+    if (hostel.ownerId.toString() !== req.user.userId) {
+      return res.status(403).json({ success: false, message: "Only the owner can request a boost" });
+    }
+
+    if (!durationDays || durationDays <= 0) {
+      return res.status(400).json({ success: false, message: "Please provide a valid boost duration in days" });
+    }
+
+    hostel.boost = {
+      isActive: true, // boost is requested
+      status: "pending",
+      startDate: null, // will set on approval
+      endDate: null,
+      durationDays,
+    };
+
+    await hostel.save();
+
+    res.status(200).json({ success: true, message: "Boost requested successfully", boost: hostel.boost });
+  } catch (error) {
+    console.error("Request boost error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const approveBoost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Only admin can approve boost" });
+    }
+
+    const hostel = await Hostel.findById(id);
+    if (!hostel) return res.status(404).json({ success: false, message: "Hostel not found" });
+
+    if (!hostel.boost || hostel.boost.status !== "pending") {
+      return res.status(400).json({ success: false, message: "No pending boost request found" });
+    }
+
+    const now = new Date();
+    const durationMs = (hostel.boost.durationDays || 1) * 24 * 60 * 60 * 1000; // convert days to ms
+
+    hostel.boost.status = "approved";
+    hostel.boost.isActive = true;
+    hostel.boost.startDate = now;
+    hostel.boost.endDate = new Date(now.getTime() + durationMs);
+
+    await hostel.save();
+
+    res.status(200).json({ success: true, message: "Boost approved", boost: hostel.boost });
+  } catch (error) {
+    console.error("Approve boost error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const rejectBoost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Only admin can reject boost" });
+    }
+
+    const hostel = await Hostel.findById(id);
+    if (!hostel) return res.status(404).json({ success: false, message: "Hostel not found" });
+
+    if (!hostel.boost) {
+      return res.status(400).json({ success: false, message: "No pending boost request found" });
+    }
+
+    hostel.boost.isActive = false;
+    hostel.boost.status = "pending";
+    hostel.boost.startDate = null;
+    hostel.boost.endDate = null;
+    hostel.boost.durationDays = null;
+
+    await hostel.save();
+
+    res.status(200).json({ success: true, message: "Boost request rejected", boost: hostel.boost });
+  } catch (error) {
+    console.error("Reject boost error:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

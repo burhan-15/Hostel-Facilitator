@@ -186,3 +186,38 @@ export const deleteFaq = async (hostelId, faqId) => {
   }
 };
 
+// Owner requests a boost
+export const requestBoost = async (hostelId, durationDays) => {
+  try {
+    const res = await API.post(`/hostels/${hostelId}/boost`, { durationDays });
+    return res.data;
+  } catch (error) {
+    console.error("Error requesting boost:", error);
+    throw error;
+  }
+};
+
+// Admin approves a boost
+export const approveBoost = async (hostelId) => {
+  try {
+    const res = await API.patch(`/hostels/${hostelId}/boost/approve`);
+    return res.data;
+  } catch (error) {
+    console.error("Error approving boost:", error);
+    throw error;
+  }
+};
+
+// Admin rejects a boost
+export const rejectBoost = async (hostelId) => {
+  try {
+    const res = await API.patch(`/hostels/${hostelId}/boost/reject`);
+    return res.data;
+  } catch (error) {
+    console.error("Error rejecting boost:", error);
+    throw error;
+  }
+};
+
+
+
