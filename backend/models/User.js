@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema(
         ref: "Hostel",
       },
     ],
+    compareList: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hostel",
+      },
+    ],
   },
   {
     timestamps: true,

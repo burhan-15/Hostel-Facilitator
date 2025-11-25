@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
 import { useState, useEffect } from "react";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../services/userService";
+import { addToCompare, removeFromCompare, getCompareList } from "../services/userService";
 
 export default function HostelCard({ hostel }) {
   const { currentUser } = useAuth();
@@ -11,6 +12,10 @@ export default function HostelCard({ hostel }) {
 
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [isCompared, setIsCompared] = useState(false);
+  const [compareLoading, setCompareLoading] = useState(false);
+
+
 
   const avgRating =
     hostel.reviews?.length > 0
@@ -33,6 +38,19 @@ export default function HostelCard({ hostel }) {
       }
     };
     checkWishlist();
+
+    const checkCompare = async () => {
+      if (currentUser?.role === "user") {
+        try {
+          const data = await getCompareList();
+          const exists = data.compareList.some(h => (h._id || h.id) === hostelIdString);
+          setIsCompared(exists);
+        } catch (error) {
+          console.error("Error checking compare list:", error);
+        }
+      }
+    };
+    checkCompare();
   }, [currentUser, hostelIdString]);
 
   const handleWishlistToggle = async () => {
@@ -61,6 +79,33 @@ export default function HostelCard({ hostel }) {
       setWishlistLoading(false);
     }
   };
+
+  const handleCompareToggle = async () => {
+    if (!currentUser) {
+      alert("Please log in to compare hostels");
+      return;
+    }
+    if (currentUser.role !== "user") {
+      alert("Only users can compare hostels");
+      return;
+    }
+
+    setCompareLoading(true);
+    try {
+      if (isCompared) {
+        await removeFromCompare(hostelIdString);
+        setIsCompared(false);
+      } else {
+        await addToCompare(hostelIdString);
+        setIsCompared(true);
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || "Error updating compare list");
+    } finally {
+      setCompareLoading(false);
+    }
+    };
+
 
   if (!hostelIdString) return null;
 
@@ -96,10 +141,28 @@ export default function HostelCard({ hostel }) {
         <p className="text-sm text-gray-400 mt-1">For {hostel.gender} {hostel.profession}s</p>
         <p className="text-xl font-bold text-white my-2">PKR {hostel.rent.toLocaleString()}<span className="text-sm font-normal text-gray-400">/month</span></p>
         <div className="mt-auto pt-4 border-t border-gray-700 flex justify-between items-center">
-          <Link to={`/hostel/${hostelIdString}`} className="text-sm font-medium text-slate-300 hover:text-white">
+          {/* Compare Checkbox */}
+          <label className="absolute top-12 right-2 z-10 flex items-center gap-1 bg-gray-900 px-2 py-1 rounded text-gray-300 text-xs cursor-pointer hover:bg-gray-700">
+            <input
+              type="checkbox"
+              checked={isCompared}
+              disabled={compareLoading}
+              onChange={handleCompareToggle}
+              className="cursor-pointer"
+            />
+            Compare
+          </label>
+
+
+          <Link
+            to={`/hostel/${hostelIdString}`}
+            className="text-sm font-medium text-slate-300 hover:text-white"
+          >
             View Details
           </Link>
+
         </div>
+
       </div>
     </div>
   );

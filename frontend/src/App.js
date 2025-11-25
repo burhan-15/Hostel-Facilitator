@@ -11,6 +11,7 @@ import UserDashboard from "./pages/UserDashboard";
 import OwnerDashboard from "./pages/OwnerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import FAQ from "./pages/FAQ";
+import Compare from "./pages/Compare"; 
 import Footer from "./Components/footer";
 import { AuthProvider } from "./Components/AuthContext";
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="/owner" element={<OwnerDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/faq" element={<FAQ />} />
+          <Route path="/compare" element={<Compare />} />
         </Routes>
 
         <Footer />

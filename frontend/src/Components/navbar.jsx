@@ -85,6 +85,21 @@ export default function Navbar() {
 
               {currentUser.role === "user" && (
                 <NavLink
+                  to="/compare"
+                  className={({ isActive }) =>
+                    `text-sm font-medium transition ${
+                      isActive
+                        ? "text-white border-b-2 border-slate-500"
+                        : "text-gray-300 hover:text-white"
+                    }`
+                  }
+                >
+                  Compare
+                </NavLink>
+              )}
+
+              {currentUser.role === "user" && (
+                <NavLink
                   to="/dashboard"
                   className= {({ isActive }) =>
                     `text-sm font-medium transition ${
@@ -97,6 +112,7 @@ export default function Navbar() {
                   Dashboard
                 </NavLink>
               )}
+
             </>
           )}
         </div>
