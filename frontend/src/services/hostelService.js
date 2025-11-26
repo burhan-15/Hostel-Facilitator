@@ -276,4 +276,103 @@ export const getComparison = async () => {
   return { comparison };
 };
 
+// =====================
+// VISIT BOOKING — USER
+// =====================
+export const bookVisit = (hostelId, date) => {
+  return API.post(`/hostels/${hostelId}/book-visit`, { date });
+};
+
+
+
+export const getMyVisits = async () => {
+  try {
+    const res = await API.get(`/hostels/owner/visit-requests`);
+    return res.data.visits || [];
+  } catch (err) {
+    console.error("Error fetching user visits:", err);
+    return [];
+  }
+};
+
+
+// =====================
+// USER MARKS VISIT COMPLETE
+// =====================
+export const completeVisit = async (visitId) => {
+  try {
+    const res = await API.patch(`/hostels/visits/${visitId}/complete`);
+    return res.data;
+  } catch (err) {
+    console.error("Error completing visit:", err);
+    throw err;
+  }
+};
+
+// =====================
+// USER CANCELS VISIT
+// =====================
+export const cancelVisit = async (visitId) => {
+  try {
+    const res = await API.patch(`/hostels/visits/${visitId}/cancel`);
+    return res.data;
+  } catch (err) {
+    console.error("Error cancelling visit:", err);
+    throw err;
+  }
+};
+
+// =====================
+// OWNER — GET VISIT REQUESTS
+// =====================
+export const getOwnerVisitRequests = async () => {
+  try {
+    const res = await API.get(`/hostels/owner/visit-requests`);
+    return res.data.visits || [];
+  } catch (err) {
+    console.error("Error fetching owner visits:", err);
+    return [];
+  }
+};
+
+
+// =====================
+// OWNER — APPROVE VISIT
+// =====================
+export const approveVisit = async (visitId) => {
+  try {
+    const res = await API.patch(`/hostels/visits/${visitId}/approve`);
+    return res.data;
+  } catch (err) {
+    console.error("Error approving visit:", err);
+    throw err;
+  }
+};
+
+// =====================
+// OWNER — CANCEL VISIT
+// =====================
+export const ownerCancelVisit = async (visitId) => {
+  try {
+    const res = await API.patch(`/hostels/visits/${visitId}/cancel`);
+    return res.data;
+  } catch (err) {
+    console.error("Error cancelling visit:", err);
+    throw err;
+  }
+};
+
+// =====================
+// USER — GET THEIR OWN VISITS
+// =====================
+export const getUserVisits = async () => {
+  try {
+    const res = await API.get(`/hostels/user/my-visits`);
+    return res.data.visits || [];
+  } catch (err) {
+    console.error("Error fetching user visits:", err);
+    return [];
+  }
+};
+
 

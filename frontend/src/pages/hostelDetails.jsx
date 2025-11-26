@@ -4,6 +4,8 @@ import { useAuth } from "../Components/AuthContext";
 import { getHostelById, addQuestion } from "../services/hostelService";
 import { addReview } from "../services/hostelService";
 import { incrementViewCount } from "../services/hostelService";
+import { bookVisit } from "../services/hostelService";
+
 
 export default function HostelDetail() {
   const { id } = useParams();
@@ -15,6 +17,10 @@ export default function HostelDetail() {
   const [reviews, setReviews] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [faqs, setFaqs] = useState([]);
+  const [showVisitModal, setShowVisitModal] = useState(false);
+  const [visitDate, setVisitDate] = useState("");
+  const [visitTime, setVisitTime] = useState("");
+
 
   useEffect(() => {
     const fetchHostel = async () => {
@@ -105,6 +111,34 @@ export default function HostelDetail() {
     }
   };
 
+  const handleBookVisit = async () => {
+    if (!visitDate) return alert("Select a date");
+    if (!visitTime) return alert("Select a time");
+
+    const fullDateTime = `${visitDate}T${visitTime}:00`;
+
+    console.log("FULL DATETIME SENT:", fullDateTime);
+    console.log("HOSTEL ID:", id);
+
+    try {
+      const res = await bookVisit(id, fullDateTime);
+
+      console.log("BOOK VISIT RESPONSE:", res.data);
+
+      if (res.data.success) {
+        alert("Visit booked!");
+        setShowVisitModal(false);
+      } else {
+        alert(res.data.message || "Could not book a visit");
+      }
+    } catch (error) {
+      console.error("BOOK VISIT ERROR:", error.response?.data || error.message);
+      alert("Could not book a visit");
+    }
+  };
+
+
+
   return (
     <div className="bg-gray-900 min-h-screen text-white p-6">
       <div className="max-w-5xl mx-auto">
@@ -193,6 +227,16 @@ export default function HostelDetail() {
                   <strong>Contact:</strong> {hostel.contact}
                 </p>
               </div>
+
+              {currentUser?.role === "user" && (
+                <button 
+                  onClick={() => setShowVisitModal(true)}
+                  className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 py-2 px-4 rounded-lg"
+                >
+                  Book a Visit
+                </button>
+              )}
+
 
               {!currentUser && (
                 <p className="mt-6 text-center text-sm text-gray-300 p-4 bg-gray-800 rounded-md">
@@ -373,7 +417,68 @@ export default function HostelDetail() {
             )}
           </div>
         </div>
+
+      {showVisitModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center 
+                        backdrop-blur-sm animate-fadeIn">
+          
+          <div className="bg-gray-800 p-6 rounded-xl w-96 border border-gray-700 shadow-xl 
+                          transform animate-scaleIn">
+
+            <h3 className="text-2xl font-semibold mb-4 text-white text-center">
+              Book a Visit
+            </h3>
+
+            {/* Date Picker */}
+            <label className="block text-gray-300 mb-1">Select Date:</label>
+            <input
+              type="date"
+              className="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 
+                        focus:ring-2 focus:ring-indigo-500 transition-all"
+              value={visitDate}
+              onChange={(e) => setVisitDate(e.target.value)}
+            />
+
+            {/* Time Picker */}
+            <label className="block text-gray-300 mt-4 mb-1">Select Time:</label>
+            <input
+              type="time"
+              className="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 
+                        focus:ring-2 focus:ring-indigo-500 transition-all"
+              value={visitTime}
+              onChange={(e) => setVisitTime(e.target.value)}
+            />
+
+            <div className="flex justify-end mt-6 space-x-3">
+              
+              {/* Cancel */}
+              <button
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600
+                          transition-all duration-200 active:scale-95"
+                onClick={() => setShowVisitModal(false)}
+              >
+                Cancel
+              </button>
+
+              {/* Book */}
+              <button
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700
+                          transition-all duration-200 active:scale-95"
+                onClick={handleBookVisit}
+              >
+                Book
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+
+
       </div>
+
+
     </div>
   );
 }

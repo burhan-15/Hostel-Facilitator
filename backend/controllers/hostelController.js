@@ -1,5 +1,7 @@
 import Hostel from "../models/Hostel.js";
 import User from "../models/User.js";
+import Visit from "../models/Visit.js";
+
 
 // Get all hostels (with optional filters)
 export const getAllHostels = async (req, res) => {
@@ -500,3 +502,182 @@ export const rejectBoost = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+export const bookVisit = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const hostelId = req.params.id;
+    const { date } = req.body;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: "Visit date is required",
+      });
+    }
+
+    const hostel = await Hostel.findById(hostelId);
+    if (!hostel) {
+      return res.status(404).json({
+        success: false,
+        message: "Hostel not found",
+      });
+    }
+
+    const visit = await Visit.create({
+      user: userId,
+      owner: hostel.ownerId,
+      hostel: hostelId,
+
+      // ✅ FIXED: convert to real Date object (keeps your selected time)
+      date: new Date(date),
+
+      status: "pending",
+      completed: false,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Visit request sent",
+      visit,
+    });
+  } catch (error) {
+    console.error("Book visit error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const getMyVisitsForOwner = async (req, res) => {
+  try {
+    const ownerId = req.user.userId;
+
+    const visits = await Visit.find({ owner: ownerId })
+      .populate("user", "name email")
+      .populate("hostel", "name area");
+
+    res.status(200).json({
+      success: true,
+      visits,
+    });
+  } catch (error) {
+    console.error("Fetch owner visits error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const approveVisit = async (req, res) => {
+  try {
+    const visitId = req.params.visitId;
+
+    const visit = await Visit.findById(visitId);
+    if (!visit) {
+      return res.status(404).json({
+        success: false,
+        message: "Visit not found",
+      });
+    }
+
+    visit.status = "approved";
+    await visit.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Visit approved",
+      visit,
+    });
+  } catch (error) {
+    console.error("Approve visit error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const cancelVisit = async (req, res) => {
+  try {
+    const visitId = req.params.visitId;
+
+    const visit = await Visit.findById(visitId);
+    if (!visit) {
+      return res.status(404).json({
+        success: false,
+        message: "Visit not found",
+      });
+    }
+
+    visit.status = "cancelled";
+    await visit.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Visit cancelled",
+      visit,
+    });
+  } catch (error) {
+    console.error("Cancel visit error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const completeVisit = async (req, res) => {
+  try {
+    const visitId = req.params.visitId;
+
+    const visit = await Visit.findById(visitId);
+    if (!visit) {
+      return res.status(404).json({
+        success: false,
+        message: "Visit not found",
+      });
+    }
+
+    if (visit.status !== "approved") {
+      return res.status(400).json({
+        success: false,
+        message: "Visit must be approved before marking complete",
+      });
+    }
+
+    visit.completed = true;
+    visit.status = "completed";
+    await visit.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Visit marked as completed",
+      visit,
+    });
+  } catch (error) {
+    console.error("Complete visit error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const getMyVisitsForUser = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const visits = await Visit.find({ user: userId })
+      .populate("hostel", "name area image rent gender")
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, visits });
+  } catch (err) {
+    console.error("Error getting user visits:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch visits" });
+  }
+};
+

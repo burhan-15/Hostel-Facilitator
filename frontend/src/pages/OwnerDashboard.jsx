@@ -8,7 +8,15 @@ import EditHostelModal from "../Components/EditHostelModal";
 import ManageFaqModal from "../Components/ManageFaqModal";
 import BoostModal from "../Components/boostModal";
 
-import { getMyHostels, deleteHostel, answerQuestion } from "../services/hostelService";
+import { 
+  getMyHostels, 
+  deleteHostel, 
+  answerQuestion,
+  getOwnerVisitRequests, 
+  approveVisit, 
+  ownerCancelVisit 
+} from "../services/hostelService";
+
 
 export default function OwnerDashboard() {
   const { currentUser } = useAuth();
@@ -25,6 +33,10 @@ export default function OwnerDashboard() {
   const [showBoostModal, setShowBoostModal] = useState(false);
   const [boostHostelId, setBoostHostelId] = useState(null);
 
+  const [ownerVisits, setOwnerVisits] = useState([]);
+  const [visitsLoading, setVisitsLoading] = useState(true);
+
+
   useEffect(() => {
     const fetchHostels = async () => {
       try {
@@ -36,8 +48,27 @@ export default function OwnerDashboard() {
         setLoading(false);
       }
     };
-    fetchHostels();
+    fetchHostels();   
   }, []);
+
+useEffect(() => {
+  const fetchOwnerVisits = async () => {
+    try {
+      setVisitsLoading(true);
+
+      // Fetch once – backend already returns all visits for the owner
+      const visits = await getOwnerVisitRequests();
+      setOwnerVisits(visits);
+
+    } catch (err) {
+      console.error("Error fetching visits:", err);
+    } finally {
+      setVisitsLoading(false);
+    }
+  };
+
+  fetchOwnerVisits();
+}, [hostels]); 
 
   if (!currentUser || currentUser.role !== "owner") {
     return <Navigate to="/login" replace />;
@@ -88,6 +119,33 @@ export default function OwnerDashboard() {
     const data = await getMyHostels();
     setHostels(data);
   };
+
+  const handleApprove = async (visitId) => {
+    try {
+      await approveVisit(visitId);
+      const updated = ownerVisits.map(v =>
+        v._id === visitId ? { ...v, status: "approved" } : v
+      );
+      setOwnerVisits(updated);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to approve visit");
+    }
+  };
+
+  const handleReject = async (visitId) => {
+    try {
+      await ownerCancelVisit(visitId);
+      const updated = ownerVisits.map(v =>
+        v._id === visitId ? { ...v, status: "cancelled" } : v
+      );
+      setOwnerVisits(updated);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to cancel visit");
+    }
+  };
+
 
   if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
 
@@ -249,6 +307,67 @@ export default function OwnerDashboard() {
             </div>
           )}
         </div>
+
+          {/* --- Scheduled Visits Section --- */}
+        <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 mt-8">
+          <h3 className="text-2xl font-bold mb-4">Scheduled Visits</h3>
+
+          {visitsLoading ? (
+            <p className="text-gray-400">Loading visits...</p>
+          ) : ownerVisits.length === 0 ? (
+            <p className="text-gray-400">No visit requests yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {ownerVisits.map((v) => (
+                <div
+                  key={v._id}
+                  className="p-4 border border-gray-700 rounded-lg bg-gray-700"
+                >
+                  <p className="text-white font-semibold">Hostel: {v.hostel.name}</p>
+                  <p className="text-gray-300">User: {v.user.name} ({v.user.email})</p>
+                  <p className="text-gray-300 mt-1">
+                    Visit Time: {new Date(v.date).toLocaleString()}
+                  </p>
+
+                  <p className="text-gray-300 mt-1">
+                    Status:{" "}
+                    <span
+                      className={`font-bold ${
+                        v.status === "approved"
+                          ? "text-green-400"
+                          : v.status === "pending"
+                          ? "text-yellow-300"
+                          : "text-red-400"
+                      }`}
+                    >
+                      {v.status.toUpperCase()}
+                    </span>
+                  </p>
+
+                  {v.status === "pending" && (
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => handleApprove(v._id)}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 rounded"
+                      >
+                        Approve
+                      </button>
+
+                      <button
+                        onClick={() => handleReject(v._id)}
+                        className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+
       </div>
     </div>
   );
