@@ -49,7 +49,22 @@ export default function Navbar() {
                   ? "text-white border-b-2 border-slate-500"
                   : "text-gray-300 hover:text-white"
               }`
-            }>FAQs</NavLink>
+            }
+            >FAQs
+          </NavLink>
+
+          <NavLink
+                to="/compare"
+                className={({ isActive }) =>
+                  `text-sm font-medium transition ${
+                    isActive
+                      ? "text-white border-b-2 border-slate-500"
+                      : "text-gray-300 hover:text-white"
+                  }`
+                }
+              >Compare
+            </NavLink>
+            
 
           {currentUser && (
             <>
@@ -80,21 +95,6 @@ export default function Navbar() {
                   }
                 >
                   Owner Dashboard
-                </NavLink>
-              )}
-
-              {currentUser.role === "user" && (
-                <NavLink
-                  to="/compare"
-                  className={({ isActive }) =>
-                    `text-sm font-medium transition ${
-                      isActive
-                        ? "text-white border-b-2 border-slate-500"
-                        : "text-gray-300 hover:text-white"
-                    }`
-                  }
-                >
-                  Compare
                 </NavLink>
               )}
 

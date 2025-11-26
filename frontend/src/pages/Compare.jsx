@@ -3,33 +3,29 @@ import { useNavigate } from "react-router-dom";
 import {
   getComparison,
   removeFromCompare,
-  clearCompareList,
-} from "../services/userService";
+  clearCompareList
+} from "../services/hostelService";
 
 export default function Compare() {
   const navigate = useNavigate();
   const [comparison, setComparison] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  // mounted controls fade/slide animation
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     loadComparison();
-    // small delay to trigger entrance animation
-    const t = setTimeout(() => setMounted(true), 40);
+    const t = setTimeout(() => setMounted(true), 80);
     return () => clearTimeout(t);
   }, []);
 
   const loadComparison = async () => {
     try {
       setLoading(true);
-      setError("");
-      const data = await getComparison(); // expects { comparison: { hostel1, hostel2 } }
-      // compat: some backends return { comparison } or { comparison: null }
+      const data = await getComparison();
       setComparison(data?.comparison ?? null);
     } catch (err) {
-      setError(err?.response?.data?.message || "Error loading comparison");
+      setError("Error loading comparison");
     } finally {
       setLoading(false);
     }
@@ -39,11 +35,8 @@ export default function Compare() {
     try {
       await removeFromCompare(hostelId);
       await loadComparison();
-      // brief visual feedback: re-run entrance animation
-      setMounted(false);
-      setTimeout(() => setMounted(true), 40);
-    } catch (err) {
-      alert(err?.response?.data?.message || "Error removing hostel");
+    } catch {
+      alert("Error removing hostel");
     }
   };
 
@@ -51,43 +44,34 @@ export default function Compare() {
     try {
       await clearCompareList();
       navigate("/hostels");
-    } catch (err) {
-      alert(err?.response?.data?.message || "Error clearing compare list");
+    } catch {
+      alert("Error clearing compare list");
     }
   };
 
   const calcAvgRating = (reviews) => {
     if (!reviews || reviews.length === 0) return "N/A";
-    const total = reviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+    const total = reviews.reduce((s, r) => s + (r.rating || 0), 0);
     return (total / reviews.length).toFixed(1);
   };
 
-  // --- Loading skeleton ---
+  // ------------------------------------------------ LOADING
   if (loading) {
     return (
       <div className="bg-gray-900 min-h-screen flex items-center justify-center p-8">
-        <div className="w-full max-w-4xl space-y-4">
-          <div className="h-8 w-1/3 bg-gray-700 rounded animate-pulse" />
-          <div className="bg-gray-800 rounded-lg p-6">
-            <div className="h-56 bg-gray-700 rounded animate-pulse" />
-            <div className="mt-4 flex gap-3">
-              <div className="h-6 w-1/4 bg-gray-700 rounded animate-pulse" />
-              <div className="h-6 w-1/4 bg-gray-700 rounded animate-pulse" />
-            </div>
-          </div>
-        </div>
+        <p className="text-gray-300 text-lg animate-pulse">Loading comparison...</p>
       </div>
     );
   }
 
-  // --- Error state ---
+  // ------------------------------------------------ ERROR
   if (error) {
     return (
       <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-center p-8">
         <p className="text-red-400 text-xl mb-4">{error}</p>
         <button
           onClick={() => navigate("/hostels")}
-          className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition transform hover:-translate-y-0.5"
+          className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
         >
           Back to Hostels
         </button>
@@ -95,51 +79,75 @@ export default function Compare() {
     );
   }
 
-  // --- Nothing selected yet ---
-  if (!comparison) {
-    return (
-      <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-center p-8">
-        <h2 className="text-2xl text-gray-300 mb-4">Please select hostels to compare</h2>
+  if (!comparison || (!comparison.hostel1 && !comparison.hostel2)) {
+  return (
+    <div className="bg-gray-900 min-h-screen flex flex-col items-center justify-center p-8 text-center">
+
+      <div className="bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700 max-w-md animate-fadeIn">
+        <h2 className="text-3xl font-semibold text-white mb-4">
+          No Hostels Added for Comparison
+        </h2>
+
+        <p className="text-gray-300 mb-6">
+          Add hostels to compare their rent, location, amenities, and more.
+        </p>
+
         <button
           onClick={() => navigate("/hostels")}
-          className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition transform hover:-translate-y-0.5"
+          className="bg-indigo-600 text-white px-6 py-3 rounded-lg 
+                     hover:bg-indigo-700 transform hover:scale-105 
+                     transition shadow-md"
         >
-          Go to Hostels
+          Add Hostels
         </button>
       </div>
-    );
-  }
 
-  const hostel1 = comparison.hostel1 ?? null;
-  const hostel2 = comparison.hostel2 ?? null;
+    </div>
+  );
+}
 
-  // If only one hostel in compare list, show one-hostel UI + CTA to add another
+
+  const hostel1 = comparison.hostel1 || null;
+  const hostel2 = comparison.hostel2 || null;
+
+  // ------------------------------------------------ ONE HOSTEL SELECTED
   if (hostel1 && !hostel2) {
     return (
       <div className="bg-gray-900 min-h-screen p-8">
-        <div className={`max-w-4xl mx-auto transform transition duration-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+        <div
+          className={`max-w-4xl mx-auto transform transition-all duration-700 ${
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          }`}
+        >
           <h1 className="text-4xl font-bold text-white mb-6">Compare Hostels</h1>
 
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-md hover:shadow-lg transition">
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <img src={hostel1.image} alt={hostel1.name} className="w-full md:w-1/2 h-60 object-cover rounded-lg transform transition hover:scale-105" />
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-xl hover:shadow-indigo-500/20 transition">
+            <div className="flex flex-col md:flex-row gap-6">
+              <img
+                src={hostel1.image}
+                alt={hostel1.name}
+                className="w-full md:w-1/2 h-60 object-cover rounded-lg transform transition hover:scale-105"
+              />
+
               <div className="flex-1">
-                <h2 className="text-2xl font-semibold text-white">{hostel1.name}</h2>
-                <p className="text-gray-300 mt-2">PKR {hostel1.rent?.toLocaleString()} / month</p>
-                <p className="text-gray-400 mt-1">{hostel1.area}</p>
+                <h2 className="text-2xl text-white font-semibold">{hostel1.name}</h2>
+                <p className="text-gray-300 mt-2 text-lg">
+                  Rs {hostel1.rent?.toLocaleString()}
+                </p>
+
                 <div className="mt-4 flex gap-3">
                   <button
                     onClick={() => handleRemove(hostel1._id)}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition transform hover:-translate-y-0.5"
+                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition transform hover:scale-105"
                   >
-                    Remove from Compare
+                    Remove
                   </button>
 
                   <button
                     onClick={() => navigate(`/hostel/${hostel1._id}`)}
-                    className="bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-600 transition transform hover:-translate-y-0.5"
+                    className="bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-600 transition transform hover:scale-105"
                   >
-                    View Hostel
+                    View
                   </button>
                 </div>
               </div>
@@ -149,9 +157,9 @@ export default function Compare() {
           <div className="text-center mt-8">
             <button
               onClick={() => navigate("/hostels")}
-              className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition transform hover:-translate-y-0.5"
+              className="bg-indigo-600 text-white px-6 py-3 rounded hover:bg-indigo-700 transition transform hover:scale-105 shadow-lg"
             >
-              Add Another Hostel to Compare
+              Add Another Hostel
             </button>
           </div>
         </div>
@@ -159,156 +167,152 @@ export default function Compare() {
     );
   }
 
-  // If both hostels present, show table compare UI
+  // ------------------------------------------------ TWO HOSTELS SELECTED
   if (hostel1 && hostel2) {
     return (
       <div className="bg-gray-900 min-h-screen p-8">
-        <div className={`max-w-7xl mx-auto transform transition duration-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
-          {/* Header */}
+        <div
+          className={`max-w-7xl mx-auto transition-all duration-700 ${
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+          }`}
+        >
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-white">Compare Hostels</h1>
+            <h1 className="text-4xl text-white font-bold">Compare Hostels</h1>
+
             <div className="flex gap-3">
               <button
                 onClick={handleClear}
-                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition transform hover:-translate-y-0.5"
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition transform hover:scale-105"
               >
                 Clear All
               </button>
+
               <button
                 onClick={() => navigate("/hostels")}
-                className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition transform hover:-translate-y-0.5"
+                className="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-600 transition transform hover:scale-105"
               >
-                Back to Hostels
+                Back
               </button>
             </div>
           </div>
 
-          {/* Comparison Table */}
-          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 shadow-sm">
+          {/* COMPARISON TABLE */}
+          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden shadow-xl">
             <table className="w-full">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th className="w-1/3 p-4 text-left text-white font-semibold">Hostels</th>
-                  <th className="w-1/3 p-4 text-center text-white font-semibold">
-                    <div className="flex flex-col items-center gap-2">
-                      <span className="font-semibold">{hostel1.name}</span>
-                      <div className="flex gap-2">
+
+              <thead className="bg-gray-700 text-white">
+                <tr className="animate-fadeSlideDown">
+                  <th className="p-4 text-left text-lg">Field</th>
+
+                  {[hostel1, hostel2].map((h, idx) => (
+                    <th key={idx} className="p-4 text-center">
+                      <span className="text-lg font-semibold">{h.name}</span>
+
+                      <div className="mt-3 flex justify-center gap-3">
                         <button
-                          onClick={() => handleRemove(hostel1._id)}
-                          className="text-xs bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition"
-                        >
-                          Remove
-                        </button>
-                        <button
-                          onClick={() => navigate(`/hostel/${hostel1._id}`)}
-                          className="text-xs bg-indigo-600 px-3 py-1 rounded hover:bg-indigo-700 transition"
+                          onClick={() => navigate(`/hostel/${h._id}`)}
+                          className="px-4 py-1.5 text-xs rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transform hover:scale-105 transition shadow-md"
                         >
                           View
                         </button>
-                      </div>
-                    </div>
-                  </th>
-                  <th className="w-1/3 p-4 text-center text-white font-semibold">
-                    <div className="flex flex-col items-center gap-2">
-                      <span className="font-semibold">{hostel2.name}</span>
-                      <div className="flex gap-2">
+
                         <button
-                          onClick={() => handleRemove(hostel2._id)}
-                          className="text-xs bg-red-600 px-3 py-1 rounded hover:bg-red-700 transition"
+                          onClick={() => handleRemove(h._id)}
+                          className="px-4 py-1.5 text-xs rounded-full bg-red-600 text-white hover:bg-red-700 transform hover:scale-105 transition shadow-md"
                         >
                           Remove
                         </button>
-                        <button
-                          onClick={() => navigate(`/hostel/${hostel2._id}`)}
-                          className="text-xs bg-indigo-600 px-3 py-1 rounded hover:bg-indigo-700 transition"
-                        >
-                          View
-                        </button>
                       </div>
-                    </div>
-                  </th>
+                    </th>
+                  ))}
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-700">
-                {/* Image */}
-                <tr className="hover:translate-x-0 hover:shadow-sm transition transform duration-200">
-                  <td className="p-4 text-gray-300 font-medium">Image</td>
-                  <td className="p-4">
-                    <img src={hostel1.image} alt={hostel1.name} className="w-full h-48 object-cover rounded transform transition hover:scale-105" />
-                  </td>
-                  <td className="p-4">
-                    <img src={hostel2.image} alt={hostel2.name} className="w-full h-48 object-cover rounded transform transition hover:scale-105" />
-                  </td>
+              <tbody className="divide-y divide-gray-700 text-gray-300">
+
+                <tr className="animate-row">
+                  <td className="p-4">Image</td>
+
+                  {[hostel1, hostel2].map((h, idx) => (
+                    <td key={idx} className="p-4">
+                      <div className="w-full aspect-video bg-gray-700 rounded overflow-hidden flex items-center justify-center">
+                        {h.image ? (
+                          <img
+                            src={h.image}
+                            alt={h.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <p className="text-gray-300 text-lg italic">No Image Available</p>
+                        )}
+                      </div>
+                    </td>
+                  ))}
                 </tr>
 
-                {/* Rent */}
-                <tr className="bg-gray-900/20">
-                  <td className="p-4 text-gray-300 font-medium">Monthly Rent</td>
-                  <td className="p-4 text-center">
-                    <span className="text-lg font-bold text-white">Rs {hostel1.rent?.toLocaleString()}</span>
-                  </td>
-                  <td className="p-4 text-center">
-                    <span className="text-lg font-bold text-white">Rs {hostel2.rent?.toLocaleString()}</span>
-                  </td>
+
+                {/* RENT */}
+                <tr className="animate-row">
+                  <td className="p-4">Monthly Rent</td>
+                  <td className="p-4 text-center text-white">Rs {hostel1.rent.toLocaleString()}</td>
+                  <td className="p-4 text-center text-white">Rs {hostel2.rent.toLocaleString()}</td>
                 </tr>
 
-                {/* Rating */}
-                <tr>
-                  <td className="p-4 text-gray-300 font-medium">Average Rating</td>
-                  <td className="p-4 text-center">
-                    <div className="text-white font-semibold">⭐ {calcAvgRating(hostel1.reviews)}</div>
-                    <div className="text-gray-400 text-sm">({hostel1.reviews?.length || 0} reviews)</div>
-                  </td>
-                  <td className="p-4 text-center">
-                    <div className="text-white font-semibold">⭐ {calcAvgRating(hostel2.reviews)}</div>
-                    <div className="text-gray-400 text-sm">({hostel2.reviews?.length || 0} reviews)</div>
-                  </td>
+                {/* RATING */}
+                <tr className="animate-row">
+                  <td className="p-4">Rating</td>
+                  <td className="p-4 text-center text-white">⭐ {calcAvgRating(hostel1.reviews)}</td>
+                  <td className="p-4 text-center text-white">⭐ {calcAvgRating(hostel2.reviews)}</td>
                 </tr>
 
-                {/* Area */}
-                <tr className="bg-gray-900/20">
-                  <td className="p-4 text-gray-300 font-medium">Area</td>
+                {/* AREA */}
+                <tr className="animate-row">
+                  <td className="p-4">Area</td>
                   <td className="p-4 text-center text-white">{hostel1.area}</td>
                   <td className="p-4 text-center text-white">{hostel2.area}</td>
                 </tr>
 
-                {/* Amenities */}
-                <tr className="bg-gray-900/20">
-                  <td className="p-4 text-gray-300 font-medium">Amenities</td>
-                  <td className="p-4">
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {(hostel1.amenities || []).map((a, idx) => (
-                        <span key={idx} className="bg-indigo-600 text-white px-2 py-1 rounded text-sm">{a}</span>
-                      ))}
-                      {(hostel1.amenities || []).length === 0 && <span className="text-gray-400">No amenities</span>}
-                    </div>
+                {/* AMENITIES */}
+                <tr className="animate-row">
+                  <td className="p-4">Amenities</td>
+
+                  {[hostel1, hostel2].map((h, idx) => (
+                    <td key={idx} className="p-4">
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {h.amenities?.map((a, i) => (
+                          <span
+                            key={i}
+                            className="bg-indigo-600 px-2 py-1 rounded text-sm text-white shadow"
+                          >
+                            {a}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+
+                {/* Wishlist Count */}
+                <tr className="hover:bg-gray-700/40 transition-all hover:scale-[1.01] hover:shadow-xl">
+                  <td className="p-4 text-gray-300 font-medium">Wishlisted </td>
+
+                  <td className="p-4 text-center text-white">
+                    {hostel1.shortlists || hostel1.wishlistCount || 0} 
                   </td>
-                  <td className="p-4">
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      {(hostel2.amenities || []).map((a, idx) => (
-                        <span key={idx} className="bg-indigo-600 text-white px-2 py-1 rounded text-sm">{a}</span>
-                      ))}
-                      {(hostel2.amenities || []).length === 0 && <span className="text-gray-400">No amenities</span>}
-                    </div>
+
+                  <td className="p-4 text-center text-white">
+                    {hostel2.shortlists || hostel2.wishlistCount || 0} 
                   </td>
                 </tr>
 
-                {/* Shortlists */}
-                <tr>
-                  <td className="p-4 text-gray-300 font-medium">Wishlist Count</td>
-                  <td className="p-4 text-center text-white">{hostel1.shortlists || 0}</td>
-                  <td className="p-4 text-center text-white">{hostel2.shortlists || 0}</td>
-                </tr>
+
               </tbody>
             </table>
           </div>
-
         </div>
       </div>
     );
   }
 
-  // fallback
   return null;
 }

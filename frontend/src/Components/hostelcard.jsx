@@ -3,7 +3,12 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
 import { useState, useEffect } from "react";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../services/userService";
-import { addToCompare, removeFromCompare, getCompareList } from "../services/userService";
+import {
+  addToCompare,
+  removeFromCompare,
+  getComparison
+} from "../services/hostelService";
+
 
 export default function HostelCard({ hostel }) {
   const { currentUser } = useAuth();
@@ -12,9 +17,9 @@ export default function HostelCard({ hostel }) {
 
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-
   const [isCompared, setIsCompared] = useState(false);
   const [compareLoading, setCompareLoading] = useState(false);
+
 
   const avgRating =
     hostel.reviews?.length > 0
@@ -29,19 +34,32 @@ export default function HostelCard({ hostel }) {
 
       try {
         const wishlist = await getWishlist();
-        const existsWL = wishlist.some(h => (h._id || h.id) === hostelIdString);
+        const existsWL = wishlist.some(
+          (h) => (h._id || h.id) === hostelIdString
+        );
         setIsWishlisted(existsWL);
-      } catch {}
-
-      try {
-        const data = await getCompareList();
-        const existsCMP = data.compareList.some(h => (h._id || h.id) === hostelIdString);
-        setIsCompared(existsCMP);
       } catch {}
     };
 
     fetchLists();
   }, [currentUser, hostelIdString]);
+
+  useEffect(() => {
+    const loadCompare = async () => {
+      if (!currentUser || currentUser.role !== "user") return;
+
+      try {
+        const data = await getComparison();
+        const h1 = data?.comparison?.hostel1?._id;
+        const h2 = data?.comparison?.hostel2?._id;
+
+        setIsCompared(h1 === hostelIdString || h2 === hostelIdString);
+      } catch {}
+    };
+
+    loadCompare();
+  }, [hostelIdString, currentUser]);
+
 
   const handleWishlistToggle = async () => {
     if (!currentUser) return alert("Please log in");
@@ -65,9 +83,6 @@ export default function HostelCard({ hostel }) {
   };
 
   const handleCompareToggle = async () => {
-    if (!currentUser) return alert("Please log in");
-    if (currentUser.role !== "user") return alert("Only users can compare hostels");
-
     setCompareLoading(true);
 
     try {
@@ -79,11 +94,13 @@ export default function HostelCard({ hostel }) {
         setIsCompared(true);
       }
     } catch (err) {
-      alert(err.response?.data?.message || "Error updating compare list");
+      alert(err.message || "Error updating compare list");
     } finally {
       setCompareLoading(false);
     }
   };
+
+
 
   if (!hostelIdString) return null;
 
@@ -103,37 +120,7 @@ export default function HostelCard({ hostel }) {
         />
       </button>
 
-      {/* === Compare Button (Improved) === */}
-      <div className="absolute bottom-3 right-3 z-20">
-        <button
-          onClick={handleCompareToggle}
-          disabled={compareLoading}
-          className={`
-            group flex items-center gap-2 px-3 py-1.5 rounded-full 
-            text-xs font-semibold transition-all duration-300 shadow-lg
-            ${isCompared 
-              ? "bg-indigo-600 text-white scale-110 animate-pulse" 
-              : "bg-gray-900/80 text-gray-300 hover:bg-gray-700 hover:scale-105"
-            }
-            ${compareLoading ? "opacity-50 cursor-not-allowed" : ""}
-          `}
-        >
-          <span 
-            className={`
-              w-3.5 h-3.5 rounded-sm border transition-all 
-              flex items-center justify-center
-              ${isCompared 
-                ? "bg-white border-white" 
-                : "border-gray-400 group-hover:border-white"
-              }
-            `}
-          >
-            {isCompared && <span className="w-2 h-2 bg-indigo-600 rounded-sm"></span>}
-          </span>
-
-          Compare
-        </button>
-      </div>
+      {/* Removed Compare Button Completely */}
 
       {/* Image */}
       <img src={hostel.image} alt={hostel.name} className="w-full h-48 object-cover" />
@@ -162,9 +149,43 @@ export default function HostelCard({ hostel }) {
         </p>
 
         <div className="mt-auto pt-4 border-t border-gray-700 flex justify-between items-center">
-          <Link to={`/hostel/${hostelIdString}`} className="text-sm font-medium text-slate-300 hover:text-white">
+          <Link
+            to={`/hostel/${hostelIdString}`}
+            className="text-sm font-medium text-slate-300 hover:text-white"
+          >
             View Details
           </Link>
+
+          <div className="absolute bottom-3 right-3 z-20">
+            <button
+              onClick={handleCompareToggle}
+              disabled={compareLoading}
+              className={`
+                group flex items-center gap-2 px-3 py-1.5 rounded-full 
+                text-xs font-semibold transition-all duration-300 shadow-lg
+                ${isCompared 
+                  ? "bg-indigo-600 text-white scale-110 animate-pulse" 
+                  : "bg-gray-900/80 text-gray-300 hover:bg-gray-700 hover:scale-105"
+                }
+                ${compareLoading ? "opacity-50 cursor-not-allowed" : ""}
+              `}
+            >
+              <span 
+                className={`
+                  w-3.5 h-3.5 rounded-sm border transition-all 
+                  flex items-center justify-center
+                  ${isCompared 
+                    ? "bg-white border-white" 
+                    : "border-gray-400 group-hover:border-white"
+                  }
+                `}
+              >
+                {isCompared && <span className="w-2 h-2 bg-indigo-600 rounded-sm"></span>}
+              </span>
+              Compare
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
