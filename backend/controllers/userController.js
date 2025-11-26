@@ -75,3 +75,41 @@ export const getWishlist = async (req, res) => {
 };
 
 
+// Get the number of plain users (role: 'user') — admin only
+export const getPlainUserCount = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Unauthorized access" });
+    }
+
+    const count = await User.countDocuments({ role: "user" });
+
+    res.status(200).json({
+      success: true,
+      count,
+    });
+  } catch (error) {
+    console.error("Get plain user count error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// Get the number of owners (role: 'owner') — admin only
+export const getOwnerCount = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "Unauthorized access" });
+    }
+
+    const count = await User.countDocuments({ role: "owner" });
+
+    res.status(200).json({
+      success: true,
+      count,
+    });
+  } catch (error) {
+    console.error("Get owner count error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+

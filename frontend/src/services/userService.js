@@ -53,3 +53,25 @@ export const getUserQuestions = async () => {
     return [];
   }
 };
+
+// Get number of plain users (admin only)
+export const getPlainUserCount = async () => {
+  try {
+    const res = await API.get("/users/count/plain-users");
+    return res.data.count || 0;
+  } catch (error) {
+    console.error("Error fetching plain user count:", error);
+    return 0;
+  }
+};
+
+// Get number of owners (admin only)
+export const getOwnerCount = async () => {
+  try {
+    const res = await API.get("/users/count/owners");
+    return res.data.count || 0;
+  } catch (error) {
+    console.error("Error fetching owner count:", error);
+    return 0;
+  }
+};
