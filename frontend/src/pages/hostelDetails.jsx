@@ -189,6 +189,9 @@ export default function HostelDetail() {
                 <p className="flex justify-between">
                   <strong>Profession:</strong> {hostel.profession}
                 </p>
+                <p className="flex justify-between">
+                  <strong>Contact:</strong> {hostel.contact}
+                </p>
               </div>
 
               {!currentUser && (

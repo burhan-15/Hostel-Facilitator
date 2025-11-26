@@ -9,6 +9,7 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
   const [gender, setGender] = useState("Male");
   const [profession, setProfession] = useState("Student");
   const [desc, setDesc] = useState("");
+  const [contact, setContact] = useState(""); // <-- new state for contact
 
   // Amenity checklist
   const amenityList = [
@@ -36,7 +37,6 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
     "Islamabad Medical & Dental College (IMDC)"
   ];
 
-  
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [selectedUnis, setSelectedUnis] = useState([]);
 
@@ -70,6 +70,7 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
         gender,
         profession,
         description: desc,
+        contact, // <-- include contact in submission
         image: "https://placehold.co/600x400/4b5563/ffffff?text=New+Hostel",
         amenities: selectedAmenities,
         universitiesNearby: selectedUnis,
@@ -95,7 +96,6 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
         className="modal bg-gray-800 rounded-lg shadow-xl w-full max-w-lg p-6 border border-gray-700 max-h-[80vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-
         <h3 className="text-2xl font-bold text-white mb-4">List a New Hostel</h3>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -123,6 +123,19 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
                 required
               />
             </div>
+          </div>
+
+          {/* CONTACT NUMBER */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300">Contact Number</label>
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-600 bg-gray-700 text-white rounded-md"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder="e.g. 0333-1234567"
+              required
+            />
           </div>
 
           {/* RENT */}
@@ -218,7 +231,7 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
             <button
               type="button"
               onClick={closeModal}
-              className="px-4 py-2 bg-gray-600 text-gray-200 rounded-lg hover:bg-gray-500"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-500"
             >
               Cancel
             </button>
@@ -226,7 +239,7 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? "Submitting..." : "Submit for Approval"}
             </button>

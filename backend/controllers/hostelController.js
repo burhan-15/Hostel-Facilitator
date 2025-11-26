@@ -26,17 +26,13 @@ export const getAllHostels = async (req, res) => {
       .populate("ownerId", "name email")
       .sort({ createdAt: -1 });
 
-    // ----------------- CUSTOM SORTING -----------------
-
     hostels = hostels.sort((a, b) => {
       const aBoost = a.boost?.status === "approved";
       const bBoost = b.boost?.status === "approved";
 
-      // Priority 1: Boosted hostels first
       if (aBoost && !bBoost) return -1;
       if (!aBoost && bBoost) return 1;
 
-      // Priority 2: Higher rating
       const aRating =
         a.reviews?.length > 0
           ? a.reviews.reduce((s, r) => s + r.rating, 0) / a.reviews.length
@@ -61,14 +57,12 @@ export const getAllHostels = async (req, res) => {
   }
 };
 
-
-// Get single hostel by ID
+// Get hostel by ID
 export const getHostelById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const hostel = await Hostel.findById(id)
-      .populate("ownerId", "name email");
+    const hostel = await Hostel.findById(id).populate("ownerId", "name email");
 
     if (!hostel) {
       return res.status(404).json({
@@ -77,8 +71,10 @@ export const getHostelById = async (req, res) => {
       });
     }
 
-
-    if ((req.user?.role !== "admin" || req.user?.role !== "owner") && hostel.status !== "approved") {
+    if (
+      (req.user?.role !== "admin" && req.user?.role !== "owner") &&
+      hostel.status !== "approved"
+    ) {
       return res.status(403).json({
         success: false,
         message: "Hostel not available",
@@ -95,18 +91,27 @@ export const getHostelById = async (req, res) => {
   }
 };
 
-// Create new hostel
+// Create hostel
 export const createHostel = async (req, res) => {
   try {
-    const { 
-      name, area, rent, gender, profession, description, 
-      image, amenities, universitiesNearby, faqs 
+    const {
+      name,
+      area,
+      rent,
+      gender,
+      profession,
+      description,
+      image,
+      amenities,
+      universitiesNearby,
+      faqs,
+      contact
     } = req.body;
 
-    if (!name || !area || !rent || !gender || !profession || !description) {
+    if (!name || !area || !rent || !gender || !profession || !description || !contact) {
       return res.status(400).json({
         success: false,
-        message: "Please provide all required fields",
+        message: "Please provide all required fields, including contact number",
       });
     }
 
@@ -117,16 +122,16 @@ export const createHostel = async (req, res) => {
       gender,
       profession,
       description,
+      contact: contact.trim(),
       image: image || "https://placehold.co/600x400/4f46e5/ffffff?text=Hostel+Image",
       amenities: amenities || [],
       nearbyUniversities: universitiesNearby || [],
-      faqs: faqs || [],  
+      faqs: faqs || [],
       ownerId: req.user.userId,
       status: "pending",
     });
 
-    const populatedHostel = await Hostel.findById(hostel._id)
-      .populate("ownerId", "name email");
+    const populatedHostel = await Hostel.findById(hostel._id).populate("ownerId", "name email");
 
     res.status(201).json({
       success: true,
@@ -170,11 +175,17 @@ export const updateHostel = async (req, res) => {
       });
     }
 
+    if (updates.contact && typeof updates.contact !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Contact must be a valid string.",
+      });
+    }
+
     Object.assign(hostel, updates);
     await hostel.save();
 
-    const updatedHostel = await Hostel.findById(id)
-      .populate("ownerId", "name email");
+    const updatedHostel = await Hostel.findById(id).populate("ownerId", "name email");
 
     res.status(200).json({
       success: true,

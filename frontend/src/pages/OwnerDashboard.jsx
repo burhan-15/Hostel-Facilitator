@@ -188,7 +188,7 @@ export default function OwnerDashboard() {
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="mt-4 px-4 py-2 bg-slate-600 rounded-lg hover:bg-slate-700"
+            className="mt-4 px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700"
           >
             Add New Hostel
           </button>

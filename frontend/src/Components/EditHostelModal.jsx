@@ -9,9 +9,10 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
   const [gender, setGender] = useState(hostel.gender);
   const [profession, setProfession] = useState(hostel.profession);
   const [desc, setDesc] = useState(hostel.description);
+  const [contact, setContact] = useState(hostel.contact || ""); // <-- new contact field
   const [amenities, setAmenities] = useState(hostel.amenities || []);
 
-  // NEW FIELD: nearby universities
+  // Nearby universities
   const universityOptions = [
     "NUST",
     "FAST",
@@ -31,9 +32,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
     "Islamabad Medical & Dental College (IMDC)"
   ];
 
-  const [nearbyUniversities, setNearbyUniversities] = useState(
-    hostel.nearbyUniversities || []
-  );
+  const [nearbyUniversities, setNearbyUniversities] = useState(hostel.nearbyUniversities || []);
 
   const toggleUniversity = (uni) => {
     setNearbyUniversities((prev) =>
@@ -81,6 +80,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
         gender,
         profession,
         description: desc,
+        contact, // <-- include contact here
         amenities,
         nearbyUniversities,
       };
@@ -130,6 +130,19 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
                 required
               />
             </div>
+          </div>
+
+          {/* Contact Number */}
+          <div>
+            <label className="block text-sm text-gray-300">Contact Number</label>
+            <input
+              type="text"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
+              placeholder="e.g. 0333-1234567"
+              required
+            />
           </div>
 
           {/* Rent */}
@@ -200,7 +213,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
             </div>
           </div>
 
-          {/* NEW SECTION — Nearby Universities */}
+          {/* Nearby Universities */}
           <div>
             <label className="block text-sm text-gray-300 mb-1">Nearby Universities</label>
             <div className="grid grid-cols-2 gap-2">
@@ -223,7 +236,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
             <button
               type="button"
               onClick={closeModal}
-              className="px-4 py-2 bg-gray-600 text-gray-200 rounded-lg"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg"
             >
               Cancel
             </button>

@@ -154,6 +154,12 @@ const hostelSchema = new mongoose.Schema(
       },
     ],
 
+    contact: {
+      type: String,
+      required: [true, "Contact number is required"],
+      trim: true,
+    },
+
     boost: {
       isActive: { type: Boolean, default: false },
       status: { type: String, enum: ["pending", "approved"], default: "pending" },
