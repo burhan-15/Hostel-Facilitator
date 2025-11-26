@@ -296,7 +296,7 @@ export default function Compare() {
 
                 {/* Shortlists */}
                 <tr>
-                  <td className="p-4 text-gray-300 font-medium">Shortlisted By</td>
+                  <td className="p-4 text-gray-300 font-medium">Wishlist Count</td>
                   <td className="p-4 text-center text-white">{hostel1.shortlists || 0}</td>
                   <td className="p-4 text-center text-white">{hostel2.shortlists || 0}</td>
                 </tr>
