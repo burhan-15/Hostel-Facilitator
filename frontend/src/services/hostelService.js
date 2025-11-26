@@ -219,10 +219,6 @@ export const rejectBoost = async (hostelId) => {
   }
 };
 
-// ===========================
-// FRONTEND-ONLY COMPARE LIST
-// ===========================
-
 const COMPARE_KEY = "compare_list";
 
 // helper: get list of hostel IDs

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
+import { getPlainUserCount, getOwnerCount } from "../services/userService";
 
 // HOSTEL ACTIONS
 import {
@@ -40,10 +41,15 @@ export default function AdminDashboard() {
         setLoading(true);
 
         const hostelsData = await getAllHostels();
+        const [plainCount, ownerCount] = await Promise.all([
+          getPlainUserCount(),
+          getOwnerCount(),
+        ]);
+
         setHostels(hostelsData);
 
         // placeholder numbers
-        setUsers({ users: 10, owners: 5 });
+        setUsers({ users: plainCount, owners: ownerCount });
 
         const faqData = await getFAQs();
         setFaqs(Array.isArray(faqData) ? faqData : []);
