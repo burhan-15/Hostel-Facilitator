@@ -21,8 +21,7 @@ export default function FAQ() {
     loadFAQs();
   }, []);
 
-  if (loading)
-    return <p className="text-white text-center mt-10">Loading FAQs...</p>;
+  if (loading) return <FAQSkeleton />;
 
   return (
     <div className="bg-gray-900 min-h-screen p-8">
@@ -70,6 +69,34 @@ export default function FAQ() {
             </div>
           ))
         )}
+      </div>
+    </div>
+  );
+}
+
+function FAQSkeleton() {
+  const placeholderItems = Array.from({ length: 5 }); // number of FAQ cards to show
+
+  return (
+    <div className="bg-gray-900 min-h-screen p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Title Skeleton */}
+        <div className="h-12 w-2/3 bg-gray-700 rounded mx-auto animate-pulse"></div>
+
+        {/* FAQ Cards Skeleton */}
+        {placeholderItems.map((_, index) => (
+          <div
+            key={index}
+            className="bg-gray-800 border border-gray-700 rounded-lg animate-pulse"
+          >
+            {/* Question Skeleton */}
+            <div className="h-6 w-5/6 bg-gray-600 rounded m-4"></div>
+
+            {/* Answer Skeleton */}
+            <div className="h-4 w-full bg-gray-700 rounded mb-2 mx-4"></div>
+            <div className="h-4 w-5/6 bg-gray-700 rounded mb-4 mx-4"></div>
+          </div>
+        ))}
       </div>
     </div>
   );

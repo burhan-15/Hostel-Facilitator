@@ -1,5 +1,6 @@
 import Hostel from "../models/Hostel.js";
 import User from "../models/User.js";
+import Sale from "../models/Sales.js";
 import Visit from "../models/Visit.js";
 
 
@@ -27,6 +28,38 @@ export const getAllHostels = async (req, res) => {
     let hostels = await Hostel.find(filter)
       .populate("ownerId", "name email")
       .sort({ createdAt: -1 });
+
+    const now = new Date();
+
+    for (let h of hostels) {
+      if (
+        h.boost?.isActive &&
+        h.boost?.endDate &&
+        new Date(h.boost.endDate) < now
+      ) {
+        // Reset in database
+        await Hostel.updateOne(
+          { _id: h._id },
+          {
+            $set: {
+              "boost.isActive": false,
+              "boost.status": "none",
+              "boost.durationDays": null,
+              "boost.startDate": null,
+              "boost.endDate": null
+            }
+          }
+        );
+
+        // Also update the local object so frontend receives updated values
+        h.boost.isActive = false;
+        h.boost.status = "none";
+        h.boost.durationDays = null;
+        h.boost.startDate = null;
+        h.boost.endDate = null;
+      }
+    }
+
 
     hostels = hostels.sort((a, b) => {
       const aBoost = a.boost?.status === "approved";
@@ -441,6 +474,14 @@ export const requestBoost = async (req, res) => {
   }
 };
 
+function calculateBoostPrice(days) {
+  if(days <= 0) return 0;
+  else if(days <= 7) return 500;
+  else if(days <= 15) return 900;
+  else return 1500;
+}
+
+
 export const approveBoost = async (req, res) => {
   try {
     const { id } = req.params;
@@ -465,6 +506,16 @@ export const approveBoost = async (req, res) => {
     hostel.boost.endDate = new Date(now.getTime() + durationMs);
 
     await hostel.save();
+
+    const amount = calculateBoostPrice(hostel.boost.durationDays); 
+
+    await Sale.create({
+      hostelId: hostel._id,
+      ownerId: hostel.ownerId,
+      durationDays: hostel.boost.durationDays,
+      amount,
+      purchasedAt: new Date(),
+    });
 
     res.status(200).json({ success: true, message: "Boost approved", boost: hostel.boost });
   } catch (error) {

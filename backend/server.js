@@ -7,6 +7,7 @@ import hostelRoutes from "./routes/hostelRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import faqRoutes from "./routes/faqRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import salesRoutes from "./routes/salesRoutes.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/api/hostels", hostelRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/faqs", faqRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/sales", salesRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

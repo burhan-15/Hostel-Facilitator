@@ -4,9 +4,8 @@ const API = axios.create({
   baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
 });
 
-// -------------------------------------------------------------
+
 // 1. Automatically attach token to every request
-// -------------------------------------------------------------
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -18,9 +17,9 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// -------------------------------------------------------------
+
 // 2. Handle expired/invalid tokens properly
-// -------------------------------------------------------------
+
 API.interceptors.response.use(
   (response) => response,
 
@@ -28,10 +27,9 @@ API.interceptors.response.use(
     const status = error.response?.status;
     const token = localStorage.getItem("token");
 
-    // ------------------------------------------
+    
     // If user HAS token but it is invalid/expired
     // → clear it and redirect to login
-    // ------------------------------------------
     if (status === 401 && token) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
@@ -40,11 +38,7 @@ API.interceptors.response.use(
         window.location.href = "/login";
       }
     }
-
-    // ------------------------------------------
-    // If user DOES NOT have a token (guest user)
-    // → do NOT redirect (important fix!!)
-    // ------------------------------------------
+    
 
     return Promise.reject(error);
   }

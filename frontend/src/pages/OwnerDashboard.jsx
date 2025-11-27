@@ -7,6 +7,7 @@ import AddHostelModal from "../Components/addHostelModal";
 import EditHostelModal from "../Components/EditHostelModal";
 import ManageFaqModal from "../Components/ManageFaqModal";
 import BoostModal from "../Components/boostModal";
+import OwnerDashboardSkeleton from "../Components/ownerDashboardSkeleton";
 
 import { 
   getMyHostels, 
@@ -58,7 +59,12 @@ useEffect(() => {
 
       // Fetch once – backend already returns all visits for the owner
       const visits = await getOwnerVisitRequests();
-      setOwnerVisits(visits);
+
+      const sorted = visits.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setOwnerVisits(sorted);
 
     } catch (err) {
       console.error("Error fetching visits:", err);
@@ -147,7 +153,7 @@ useEffect(() => {
   };
 
 
-  if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
+  if (loading) return <OwnerDashboardSkeleton />;
 
   return (
     <div className="bg-gray-900 min-h-screen text-white p-6">
@@ -337,7 +343,7 @@ useEffect(() => {
                           ? "text-green-400"
                           : v.status === "pending"
                           ? "text-yellow-300"
-                          : "text-red-400"
+                          : v.status === "completed" ? "text-blue-300" :"text-red-400"
                       }`}
                     >
                       {v.status.toUpperCase()}

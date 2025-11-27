@@ -31,10 +31,6 @@ export default function UserDashboard() {
           getUserVisits(),  
         ]);
 
-        console.log("USER VISITS:", userVisits);
-
-
-        // Sort reviews and questions by date
         const reviewsWithType = userReviews.map((r) => ({
           ...r,
           type: "review",
@@ -55,12 +51,17 @@ export default function UserDashboard() {
         setQuestions(combinedActivity.filter((a) => a.type === "question"));
 
         setWishlist(userWishlist || []);
-        setVisits(userVisits || []);             // ✅ added
+
+        const sorted = userVisits.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+        setVisits(sorted || []);
       } catch (err) {
         console.error("Error fetching activity:", err);
       } finally {
         setLoading(false);
-        setVisitsLoading(false);                 // ✅ added
+        setVisitsLoading(false);    
       }
     };
 

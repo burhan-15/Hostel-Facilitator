@@ -426,7 +426,7 @@ export default function HostelDetail() {
 
         {/* SHARE MODAL */}
         {showShareModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center backdrop-blur-sm animate-fadeIn">
+          <div className="fixed inset-0 bg-black/75 bg-opacity-50 flex items-center justify-center backdrop-blur-sm animate-fadeIn">
             <div className="bg-gray-800 p-6 rounded-lg w-96 border border-gray-600 shadow-xl animate-scaleIn">
               <h2 className="text-xl font-semibold mb-4 text-center">Share this Hostel</h2>
 

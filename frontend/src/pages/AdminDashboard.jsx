@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
 import { getPlainUserCount, getOwnerCount } from "../services/userService";
+import { getSalesStats } from "../services/salesService";
+import AdminDashboardSkeleton from "../Components/adminDashboardSkeleton";
 
 // HOSTEL ACTIONS
 import {
@@ -26,6 +28,8 @@ export default function AdminDashboard() {
   const [hostels, setHostels] = useState([]);
   const [users, setUsers] = useState({ users: 0, owners: 0 });
   const [loading, setLoading] = useState(true);
+  const [salesStats, setSalesStats] = useState(null);
+
 
   // FAQ STATES
   const [faqs, setFaqs] = useState([]);
@@ -53,6 +57,11 @@ export default function AdminDashboard() {
 
         const faqData = await getFAQs();
         setFaqs(Array.isArray(faqData) ? faqData : []);
+
+        const stats = await getSalesStats();
+        setSalesStats(stats);
+
+
       } catch (error) {
         console.error(error);
       } finally {
@@ -63,7 +72,7 @@ export default function AdminDashboard() {
   }, []);
 
   // ---------------- AUTH CHECK ----------------
-  if (loading) return <p className="text-white text-center mt-10">Loading...</p>;
+  if (loading) return <AdminDashboardSkeleton />;
   if (!currentUser) return <Navigate to="/login" replace />;
   if (currentUser.role !== "admin") return <Navigate to="/" replace />;
 
@@ -128,6 +137,29 @@ export default function AdminDashboard() {
             : h
         )
       );
+
+      const duration = updatedBoost.boost?.durationDays || 0;
+      let price = 0;
+      if (duration === 7) price = 500;
+      else if (duration === 15) price = 900;
+      else if (duration === 30) price = 1500;
+
+      setSalesStats((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          totalBoostsSold: prev.totalBoostsSold + 1,
+          totalRevenue: prev.totalRevenue + price,
+          monthlyRevenue: [
+            {
+              month: prev.monthlyRevenue[0].month,
+              revenue: (prev.monthlyRevenue[0] ? prev.monthlyRevenue[0].revenue : 0) + price,
+            },
+          ],
+        };
+      });
+
     } catch (e) {
       console.error(e);
       alert("Failed to approve boost");
@@ -275,7 +307,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* ------------ BOOST REQUESTS (UPDATED) ------------- */}
+        {/* ------------ BOOST REQUESTS ------------- */}
         <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
           <h3 className="text-2xl font-bold mb-4">
             Boost Requests ({hostels.filter((h) => h.boost.isActive).length})
@@ -345,6 +377,39 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+
+        {/* ------------ SALES STATS ------------- */}
+        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
+          <h3 className="text-2xl font-bold mb-4">Sales Statistics</h3>
+          {!salesStats ? (
+            <p className="text-gray-400">Loading sales stats...</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Total Sales */}
+              <div className="bg-gray-700 p-4 rounded text-center">
+                <p className="text-3xl font-semibold">{salesStats.totalBoostsSold}</p>
+                <p className="text-gray-400 text-sm">Lifetime Boost Sales</p>
+              </div>
+
+              {/* Current Month Revenue */}
+              <div className="bg-gray-700 p-4 rounded text-center">
+                <p className="text-3xl font-semibold">
+                  Rs. {(salesStats.monthlyRevenue[0] ? salesStats.monthlyRevenue[0].revenue : 0)}
+                </p>
+                <p className="text-gray-400 text-sm">This Month Revenue</p>
+              </div>
+
+              {/* Total Revenue */}
+              <div className="bg-gray-700 p-4 rounded text-center">
+                <p className="text-3xl font-semibold">
+                  Rs. {salesStats.totalRevenue}
+                </p>
+                <p className="text-gray-400 text-sm">Lifetime Revenue</p>
+              </div>
+            </div>
+          )}
+        </div>
+
 
         {/* ------------ RECENT REVIEWS ------------- */}
         <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">

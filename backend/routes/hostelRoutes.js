@@ -89,7 +89,4 @@ router.get("/user/my-visits", authenticate, authorize("user"), getMyVisitsForUse
 // SINGLE HOSTEL – MUST COME LAST!
 router.get("/:id", getHostelById);
 
-
-
-
 export default router;
