@@ -10,6 +10,8 @@ import userRoutes from "./routes/userRoutes.js";
 import salesRoutes from "./routes/salesRoutes.js";
 
 dotenv.config();
+
+// Connect Database
 connectDB();
 
 const app = express();
@@ -29,14 +31,25 @@ app.use("/api/faqs", faqRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/sales", salesRoutes);
 
-// Health check
+// Health check endpoint
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ success: true, message: "Server is running" });
+  res.status(200).json({ 
+    success: true, 
+    message: "Server is running" 
+  });
 });
 
-// 404
+// 404 handler
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: "Route not found" });
+  res.status(404).json({ 
+    success: false, 
+    message: "Route not found" 
+  });
 });
 
-export default app; // ✅ export instead of listen()
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
