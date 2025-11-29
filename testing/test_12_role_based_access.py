@@ -20,7 +20,7 @@ class TestRoleBasedAccess(unittest.TestCase):
         # Login as user
         self.driver.get(f"{self.base_url}/login")
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         self.wait.until(EC.url_contains("/dashboard"))
         
@@ -40,7 +40,7 @@ class TestRoleBasedAccess(unittest.TestCase):
         # Login as user
         self.driver.get(f"{self.base_url}/login")
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         self.wait.until(EC.url_contains("/dashboard"))
         
@@ -60,7 +60,7 @@ class TestRoleBasedAccess(unittest.TestCase):
         # Login as owner
         self.driver.get(f"{self.base_url}/login")
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("owner@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         self.wait.until(EC.url_contains("/owner"))
         
@@ -80,7 +80,7 @@ class TestRoleBasedAccess(unittest.TestCase):
         # Login as owner
         self.driver.get(f"{self.base_url}/login")
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("owner@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         self.wait.until(EC.url_contains("/owner"))
         
@@ -122,7 +122,7 @@ class TestRoleBasedAccess(unittest.TestCase):
             
             password_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']")
             password_input.clear()
-            password_input.send_keys("password")
+            password_input.send_keys("abcd123")
             
             submit_button = self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
             self.driver.execute_script("arguments[0].click();", submit_button)
@@ -192,7 +192,7 @@ class TestRoleBasedAccess(unittest.TestCase):
             
             password_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']")
             password_input.clear()
-            password_input.send_keys("password")
+            password_input.send_keys("abcd123")
             
             submit_button = self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
             self.driver.execute_script("arguments[0].click();", submit_button)
@@ -255,7 +255,7 @@ class TestRoleBasedAccess(unittest.TestCase):
             
             password_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']")
             password_input.clear()
-            password_input.send_keys("password")
+            password_input.send_keys("abcd123")
             
             submit_button = self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
             self.driver.execute_script("arguments[0].click();", submit_button)

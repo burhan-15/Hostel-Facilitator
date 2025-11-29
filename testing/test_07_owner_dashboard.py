@@ -26,7 +26,7 @@ class TestOwnerDashboard(unittest.TestCase):
         
         password_input = cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']")
         password_input.clear()
-        password_input.send_keys("password")
+        password_input.send_keys("abcd123")
         
         submit_button = cls.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
         cls.driver.execute_script("arguments[0].click();", submit_button)
@@ -74,7 +74,7 @@ class TestOwnerDashboard(unittest.TestCase):
                 
                 password_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']")
                 password_input.clear()
-                password_input.send_keys("password")
+                password_input.send_keys("abcd123")
                 
                 submit_button = self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
                 self.driver.execute_script("arguments[0].click();", submit_button)

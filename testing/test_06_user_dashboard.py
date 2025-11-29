@@ -22,7 +22,7 @@ class TestUserDashboard(unittest.TestCase):
         cls.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Password']")))
         
         cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
-        cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         
         # Wait for login button to be clickable
         login_btn = cls.wait.until(
@@ -54,7 +54,7 @@ class TestUserDashboard(unittest.TestCase):
 
         password_input = driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']")
         password_input.clear()
-        password_input.send_keys("password")
+        password_input.send_keys("abcd123")
 
         driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
 

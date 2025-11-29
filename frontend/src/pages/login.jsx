@@ -95,7 +95,7 @@ export default function Login() {
             <li><b>User:</b> user@test.com</li>
             <li><b>Owner:</b> owner@test.com</li>
             <li><b>Admin:</b> admin@test.com</li>
-            <li>(Password for all: password)</li>
+            <li>(Password for all: abcd123)</li>
           </ul>
         </div>
 

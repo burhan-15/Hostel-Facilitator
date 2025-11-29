@@ -116,7 +116,7 @@ class TestUIResponsiveness(unittest.TestCase):
         self.driver.get(f"{self.base_url}/login")
 
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
 
         # Wait until dashboard loads

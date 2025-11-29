@@ -43,7 +43,7 @@ class TestUserAuthentication(unittest.TestCase):
         
         # Fill login form
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         
         # Submit form
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
@@ -73,7 +73,7 @@ class TestUserAuthentication(unittest.TestCase):
         self.driver.get(f"{self.base_url}/login")
         
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("owner@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         
@@ -85,7 +85,7 @@ class TestUserAuthentication(unittest.TestCase):
         self.driver.get(f"{self.base_url}/login")
         
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("admin@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         
@@ -97,7 +97,7 @@ class TestUserAuthentication(unittest.TestCase):
         # Login first
         self.driver.get(f"{self.base_url}/login")
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
-        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         
         self.wait.until(EC.url_contains("/dashboard"))

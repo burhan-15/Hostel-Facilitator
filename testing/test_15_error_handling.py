@@ -73,7 +73,7 @@ class TestErrorHandling(unittest.TestCase):
         login_btn = self.safe(self.driver.find_element, By.CSS_SELECTOR, "button[type='submit']")
 
         if email: email.send_keys("user@test.com")
-        if password: password.send_keys("password")
+        if password: password.send_keys("abcd123")
         if login_btn: login_btn.click()
 
         self.safe(self.wait.until, EC.url_contains("/dashboard"))

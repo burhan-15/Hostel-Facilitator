@@ -18,7 +18,7 @@ class TestHostelDetails(unittest.TestCase):
         # Login as user
         cls.driver.get(f"{cls.base_url}/login")
         cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
-        cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         cls.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         cls.wait.until(EC.url_contains("/dashboard"))
     

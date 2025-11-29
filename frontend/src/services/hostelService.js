@@ -219,59 +219,6 @@ export const rejectBoost = async (hostelId) => {
   }
 };
 
-const COMPARE_KEY = "compare_list";
-
-// helper: get list of hostel IDs
-const getCompareIds = () => {
-  return JSON.parse(localStorage.getItem(COMPARE_KEY)) || [];
-};
-
-// Add hostel to compare
-export const addToCompare = async (hostelId) => {
-  let list = getCompareIds();
-
-  // limit 2 hostels
-  if (list.length >= 2) {
-    throw new Error("You can only compare 2 hostels at a time");
-  }
-
-  if (!list.includes(hostelId)) {
-    list.push(hostelId);
-    localStorage.setItem(COMPARE_KEY, JSON.stringify(list));
-  }
-
-  return { success: true };
-};
-
-// Remove hostel from compare
-export const removeFromCompare = async (hostelId) => {
-  let list = getCompareIds();
-  list = list.filter((id) => id !== hostelId);
-  localStorage.setItem(COMPARE_KEY, JSON.stringify(list));
-  return { success: true };
-};
-
-// Clear all compare list
-export const clearCompareList = async () => {
-  localStorage.removeItem(COMPARE_KEY);
-  return { success: true };
-};
-
-// Get compared hostels with full hostel details
-export const getComparison = async () => {
-  const ids = getCompareIds();
-
-  // get ALL hostels (already provided by your function)
-  const allHostels = await getHostels();
-
-  const comparison = {
-    hostel1: ids[0] ? allHostels.find((h) => (h._id || h.id) === ids[0]) : null,
-    hostel2: ids[1] ? allHostels.find((h) => (h._id || h.id) === ids[1]) : null,
-  };
-
-  return { comparison };
-};
-
 // =====================
 // VISIT BOOKING — USER
 // =====================

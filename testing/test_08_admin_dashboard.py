@@ -18,7 +18,7 @@ class TestAdminDashboard(unittest.TestCase):
         # Login as admin
         cls.driver.get(f"{cls.base_url}/login")
         cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("admin@test.com")
-        cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
+        cls.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("abcd123")
         cls.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
         cls.wait.until(EC.url_contains("/admin"))
     
@@ -61,8 +61,13 @@ class TestAdminDashboard(unittest.TestCase):
         try:
             reject_button = self.driver.find_element(By.XPATH, "//button[contains(text(), 'Reject')]")
             reject_button.click()
-            
+            time.sleep(1)
+
+            # Switch to alert and accept it
+            alert = self.driver.switch_to.alert
+            alert.accept()  # click 'Yes' on the alert
             time.sleep(2)
+
             self.assertTrue(True)
         except:
             print("No pending hostels to reject")

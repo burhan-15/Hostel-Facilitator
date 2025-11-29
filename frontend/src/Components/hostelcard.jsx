@@ -3,11 +3,6 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../Components/AuthContext";
 import { useState, useEffect } from "react";
 import { addToWishlist, removeFromWishlist, getWishlist } from "../services/userService";
-import {
-  addToCompare,
-  removeFromCompare,
-  getComparison
-} from "../services/hostelService";
 
 
 export default function HostelCard({ hostel }) {
@@ -17,9 +12,6 @@ export default function HostelCard({ hostel }) {
 
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [isCompared, setIsCompared] = useState(false);
-  const [compareLoading, setCompareLoading] = useState(false);
-
 
   const avgRating =
     hostel.reviews?.length > 0
@@ -44,23 +36,7 @@ export default function HostelCard({ hostel }) {
     fetchLists();
   }, [currentUser, hostelIdString]);
 
-  useEffect(() => {
-    const loadCompare = async () => {
-      if (!currentUser || currentUser.role !== "user") return;
-
-      try {
-        const data = await getComparison();
-        const h1 = data?.comparison?.hostel1?._id;
-        const h2 = data?.comparison?.hostel2?._id;
-
-        setIsCompared(h1 === hostelIdString || h2 === hostelIdString);
-      } catch {}
-    };
-
-    loadCompare();
-  }, [hostelIdString, currentUser]);
-
-
+  
   const handleWishlistToggle = async () => {
     if (!currentUser) return alert("Please log in");
     if (currentUser.role !== "user") return alert("Only users can do this");
@@ -82,25 +58,6 @@ export default function HostelCard({ hostel }) {
     }
   };
 
-  const handleCompareToggle = async () => {
-    setCompareLoading(true);
-
-    try {
-      if (isCompared) {
-        await removeFromCompare(hostelIdString);
-        setIsCompared(false);
-      } else {
-        await addToCompare(hostelIdString);
-        setIsCompared(true);
-      }
-    } catch (err) {
-      alert(err.message || "Error updating compare list");
-    } finally {
-      setCompareLoading(false);
-    }
-  };
-
-
 
   if (!hostelIdString) return null;
 
@@ -119,8 +76,6 @@ export default function HostelCard({ hostel }) {
           fill={isWishlisted ? "red" : "none"}
         />
       </button>
-
-      {/* Removed Compare Button Completely */}
 
       {/* Image */}
       <img src={hostel.image} alt={hostel.name} className="w-full h-48 object-cover" />
@@ -155,36 +110,6 @@ export default function HostelCard({ hostel }) {
           >
             View Details
           </Link>
-
-          <div className="absolute bottom-3 right-3 z-20">
-            <button
-              onClick={handleCompareToggle}
-              disabled={compareLoading}
-              className={`
-                group flex items-center gap-2 px-3 py-1.5 rounded-full 
-                text-xs font-semibold transition-all duration-300 shadow-lg
-                ${isCompared 
-                  ? "bg-indigo-600 text-white scale-110 animate-pulse" 
-                  : "bg-gray-900/80 text-gray-300 hover:bg-gray-700 hover:scale-105"
-                }
-                ${compareLoading ? "opacity-50 cursor-not-allowed" : ""}
-              `}
-            >
-              <span 
-                className={`
-                  w-3.5 h-3.5 rounded-sm border transition-all 
-                  flex items-center justify-center
-                  ${isCompared 
-                    ? "bg-white border-white" 
-                    : "border-gray-400 group-hover:border-white"
-                  }
-                `}
-              >
-                {isCompared && <span className="w-2 h-2 bg-indigo-600 rounded-sm"></span>}
-              </span>
-              Compare
-            </button>
-          </div>
 
         </div>
       </div>
