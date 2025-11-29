@@ -153,6 +153,7 @@ export default function EditHostelModal({ hostel, closeModal, updateHostel }) {
               value={rent}
               onChange={(e) => setRent(Number(e.target.value))}
               className="w-full p-2 bg-gray-700 text-white border border-gray-600 rounded-md"
+              min={0}
             />
           </div>
 

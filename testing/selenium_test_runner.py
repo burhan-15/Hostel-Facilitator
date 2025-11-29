@@ -16,8 +16,8 @@ from test_02_hostel_browsing import TestHostelBrowsing
 from test_03_hostel_details import TestHostelDetails
 from test_04_wishlist import TestWishlist
 from test_05_compare_hostels import TestCompareHostels
-from testing.test_06_user_dashboard_hello import TestUserDashboard
-from testing.test_07_owner_dashboard_hello import TestOwnerDashboard
+from test_06_user_dashboard import TestUserDashboard
+from test_07_owner_dashboard import TestOwnerDashboard
 from test_08_admin_dashboard import TestAdminDashboard
 from test_09_faq_page import TestFAQPage
 from test_10_navigation import TestNavigation

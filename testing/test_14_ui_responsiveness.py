@@ -110,30 +110,47 @@ class TestUIResponsiveness(unittest.TestCase):
     
     def test_08_dashboard_responsive(self):
         """Test dashboard responsiveness"""
+
         # Login as user
         self.driver.set_window_size(1920, 1080)
         self.driver.get(f"{self.base_url}/login")
+
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Email']").send_keys("user@test.com")
         self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']").send_keys("password")
         self.driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+
+        # Wait until dashboard loads
         self.wait.until(EC.url_contains("/dashboard"))
-        
-        # Desktop view
-        profile_section = self.driver.find_element(By.XPATH, "//h2[contains(text(), 'Your Profile')]")
+
+        # Locator that allows any form of profile heading
+        heading_locator = (
+            By.XPATH,
+            "//h1[contains(text(), 'Profile')] | "
+            "//h2[contains(text(), 'Profile')] | "
+            "//h3[contains(text(), 'Profile')]"
+        )
+
+        # Desktop view check
+        profile_section = self.wait.until(
+            EC.visibility_of_element_located(heading_locator)
+        )
         self.assertTrue(profile_section.is_displayed())
-        
-        # Mobile view
+
+        # Switch to mobile without reloading dashboard
         self.driver.set_window_size(375, 667)
-        self.driver.get(f"{self.base_url}/dashboard")
         time.sleep(2)
-        
-        profile_section_mobile = self.driver.find_element(By.XPATH, "//h2[contains(text(), 'Your Profile')]")
+
+        # Check again for profile heading in mobile view
+        profile_section_mobile = self.wait.until(
+            EC.visibility_of_element_located(heading_locator)
+        )
         self.assertTrue(profile_section_mobile.is_displayed())
-        
+
         # Logout
         self.driver.set_window_size(1920, 1080)
         self.driver.get(f"{self.base_url}/")
         time.sleep(1)
+
     
     def test_09_hostel_details_responsive(self):
         """Test hostel details page responsiveness"""

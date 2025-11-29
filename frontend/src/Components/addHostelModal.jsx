@@ -147,6 +147,7 @@ export default function AddHostelModal({ closeModal, addHostel, currentUser }) {
               value={rent}
               onChange={(e) => setRent(e.target.value)}
               required
+              min={0}
             />
           </div>
 

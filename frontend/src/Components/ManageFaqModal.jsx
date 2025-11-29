@@ -87,7 +87,7 @@ export default function ManageFaqModal({ isOpen, onClose, hostelId, currentUser 
   const isOwner = currentUser?.role === "owner";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+    <div className="fixed inset-0 z-50 flex items-center h-full justify-center bg-black bg-opacity-70">
       <div className="bg-gray-800 rounded-lg w-11/12 md:w-2/3 lg:w-1/2 p-6 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-white">Manage FAQs</h2>
