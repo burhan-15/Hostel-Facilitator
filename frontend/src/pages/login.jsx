@@ -89,16 +89,7 @@ export default function Login() {
             Login
           </button>
         </form>
-        <div className="text-sm mt-4">
-          <p className="font-medium text-slate-300">Test Accounts:</p>
-          <ul className="list-disc list-inside text-slate-400">
-            <li><b>User:</b> user@test.com</li>
-            <li><b>Owner:</b> owner@test.com</li>
-            <li><b>Admin:</b> admin@test.com</li>
-            <li>(Password for all: abcd123)</li>
-          </ul>
-        </div>
-
+      
         <p className="text-gray-400 text-sm text-center mt-4">
           Don't have an account?{" "}
           <Link to="/signup" className="text-slate-300 hover:underline">

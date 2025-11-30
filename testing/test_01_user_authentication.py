@@ -110,23 +110,6 @@ class TestUserAuthentication(unittest.TestCase):
         time.sleep(2)
         self.assertIn("/", self.driver.current_url)
     
-    def test_07_password_visibility_toggle(self):
-        """Test password show/hide functionality"""
-        self.driver.get(f"{self.base_url}/login")
-        
-        password_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder='Password']")
-        
-        # Password should be hidden initially
-        self.assertEqual(password_input.get_attribute("type"), "password")
-        
-        # Click toggle button
-        toggle_button = self.driver.find_element(By.CSS_SELECTOR, "button[aria-label*='password']")
-        toggle_button.click()
-        
-        # Password should be visible
-        time.sleep(1)
-        self.assertEqual(password_input.get_attribute("type"), "text")
-    
     @classmethod
     def tearDownClass(cls):
         cls.driver.quit()

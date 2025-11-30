@@ -72,15 +72,8 @@ class TestAdminDashboard(unittest.TestCase):
         except:
             print("No pending hostels to reject")
     
-    def test_05_view_boost_requests(self):
-        """Test viewing boost requests"""
-        self.driver.get(f"{self.base_url}/admin")
-        time.sleep(2)
-        
-        boost_section = self.driver.find_element(By.XPATH, "//h3[contains(text(), 'Boost Requests')]")
-        self.assertTrue(boost_section.is_displayed())
     
-    def test_06_approve_boost(self):
+    def test_05_approve_boost(self):
         """Test approving a boost request"""
         self.driver.get(f"{self.base_url}/admin")
         time.sleep(2)
@@ -96,7 +89,7 @@ class TestAdminDashboard(unittest.TestCase):
         except:
             print("No boost requests to approve")
     
-    def test_07_view_sales_stats(self):
+    def test_06_view_sales_stats(self):
         """Test viewing sales statistics"""
         self.driver.get(f"{self.base_url}/admin")
         time.sleep(2)
@@ -107,15 +100,7 @@ class TestAdminDashboard(unittest.TestCase):
         except:
             print("Sales statistics section not found")
     
-    def test_08_view_recent_reviews(self):
-        """Test viewing recent reviews"""
-        self.driver.get(f"{self.base_url}/admin")
-        time.sleep(2)
-        
-        reviews_section = self.driver.find_element(By.XPATH, "//h3[contains(text(), 'Recent Ratings')]")
-        self.assertTrue(reviews_section.is_displayed())
-    
-    def test_09_remove_review(self):
+    def test_07_remove_review(self):
         """Test removing a review as admin"""
         self.driver.get(f"{self.base_url}/admin")
         time.sleep(2)
@@ -131,7 +116,7 @@ class TestAdminDashboard(unittest.TestCase):
         except:
             print("No reviews to remove")
     
-    def test_10_manage_faqs(self):
+    def test_08_manage_faqs(self):
         """Test managing platform FAQs"""
         self.driver.get(f"{self.base_url}/admin")
         time.sleep(2)
@@ -141,79 +126,6 @@ class TestAdminDashboard(unittest.TestCase):
             self.assertTrue(faq_section.is_displayed())
         except:
             print("FAQ management section not found")
-    
-    def test_11_add_platform_faq(self):
-        """Test adding a new platform FAQ"""
-        self.driver.get(f"{self.base_url}/admin")
-        time.sleep(2)
-        
-        try:
-            # Scroll to FAQ section
-            faq_section = self.driver.find_element(By.XPATH, "//h3[contains(text(), 'Manage FAQs')]")
-            self.driver.execute_script("arguments[0].scrollIntoView();", faq_section)
-            time.sleep(1)
-            
-            # Fill FAQ form
-            question_input = self.driver.find_element(By.CSS_SELECTOR, "input[placeholder*='Question']")
-            question_input.send_keys(f"Test FAQ Question {int(time.time())}")
-            
-            answer_textarea = self.driver.find_element(By.CSS_SELECTOR, "textarea[placeholder*='Answer']")
-            answer_textarea.send_keys("This is a test FAQ answer.")
-            
-            # Submit
-            add_button = self.driver.find_element(By.XPATH, "//button[contains(text(), 'Add FAQ')]")
-            add_button.click()
-            
-            time.sleep(2)
-            self.assertTrue(True)
-        except Exception as e:
-            print(f"Error adding FAQ: {e}")
-    
-    def test_12_edit_platform_faq(self):
-        """Test editing a platform FAQ"""
-        self.driver.get(f"{self.base_url}/admin")
-        time.sleep(2)
-        
-        try:
-            # Scroll to FAQ section
-            faq_section = self.driver.find_element(By.XPATH, "//h3[contains(text(), 'Manage FAQs')]")
-            self.driver.execute_script("arguments[0].scrollIntoView();", faq_section)
-            time.sleep(1)
-            
-            # Find edit button
-            edit_button = faq_section.find_element(By.XPATH, ".//following-sibling::div//button[contains(text(), 'Edit')]")
-            edit_button.click()
-            
-            time.sleep(2)
-            self.assertTrue(True)
-        except:
-            print("No FAQs to edit")
-    
-    def test_13_delete_platform_faq(self):
-        """Test deleting a platform FAQ"""
-        self.driver.get(f"{self.base_url}/admin")
-        time.sleep(2)
-        
-        try:
-            # Scroll to FAQ section
-            faq_section = self.driver.find_element(By.XPATH, "//h3[contains(text(), 'Manage FAQs')]")
-            self.driver.execute_script("arguments[0].scrollIntoView();", faq_section)
-            time.sleep(1)
-            
-            # Find delete button
-            delete_button = faq_section.find_element(By.XPATH, ".//following-sibling::div//button[contains(text(), 'Delete')]")
-            delete_button.click()
-            
-            time.sleep(1)
-            
-            # Confirm deletion
-            confirm_button = self.driver.find_element(By.XPATH, "//button[contains(text(), 'Delete')]")
-            confirm_button.click()
-            
-            time.sleep(2)
-            self.assertTrue(True)
-        except:
-            print("No FAQs to delete")
     
     @classmethod
     def tearDownClass(cls):

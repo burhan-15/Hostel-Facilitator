@@ -99,17 +99,8 @@ class TestUserDashboard(unittest.TestCase):
         # Pass even if empty
         self.assertTrue(True)
 
-    def test_03_view_recent_activity(self):
-        driver = self.driver
-        driver.get(f"{self.base_url}/dashboard")
 
-        activity_elements = driver.find_elements(By.XPATH,
-            "//h2[contains(translate(text(), 'ACTIVITY', 'activity'), 'activity') or contains(translate(text(), 'RECENT', 'recent'), 'recent')] | "
-            "//h3[contains(translate(text(), 'ACTIVITY', 'activity'), 'activity') or contains(translate(text(), 'RECENT', 'recent'), 'recent')]"
-        )
-        self.assertTrue(True)
-
-    def test_04_view_user_reviews(self):
+    def test_03_view_user_reviews(self):
         driver = self.driver
         driver.get(f"{self.base_url}/dashboard")
 
@@ -119,7 +110,7 @@ class TestUserDashboard(unittest.TestCase):
         )
         self.assertTrue(True)
 
-    def test_05_view_user_questions(self):
+    def test_04_view_user_questions(self):
         driver = self.driver
         driver.get(f"{self.base_url}/dashboard")
 
@@ -129,7 +120,7 @@ class TestUserDashboard(unittest.TestCase):
         )
         self.assertTrue(True)
 
-    def test_06_view_scheduled_visits(self):
+    def test_05_view_scheduled_visits(self):
         driver = self.driver
         driver.get(f"{self.base_url}/dashboard")
 
@@ -139,30 +130,7 @@ class TestUserDashboard(unittest.TestCase):
         )
         self.assertTrue(True)
 
-    def test_07_cancel_visit(self):
-        driver = self.driver
-        driver.get(f"{self.base_url}/dashboard")
-
-        # Find cancel buttons
-        cancel_buttons = driver.find_elements(By.XPATH,
-            "//button[contains(translate(text(), 'CANCEL', 'cancel'), 'cancel') and contains(translate(text(), 'VISIT', 'visit'), 'visit')]"
-        )
-        if cancel_buttons:
-            cancel_buttons[0].click()
-        self.assertTrue(True)
-
-    def test_08_mark_visit_complete(self):
-        driver = self.driver
-        driver.get(f"{self.base_url}/dashboard")
-
-        complete_buttons = driver.find_elements(By.XPATH,
-            "//button[contains(translate(text(), 'COMPLETE', 'complete'), 'complete') or contains(translate(text(), 'MARK', 'mark'), 'mark')]"
-        )
-        if complete_buttons:
-            complete_buttons[0].click()
-        self.assertTrue(True)
-
-    def test_09_logout_from_dashboard(self):
+    def test_06_logout_from_dashboard(self):
         driver = self.driver
         driver.get(f"{self.base_url}/dashboard")
 
