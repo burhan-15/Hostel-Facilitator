@@ -15,7 +15,6 @@ The Hostel Facilitator project is designed to streamline the management and oper
 - **Backend:** Node.js, Express
 - **Database:** MongoDB
 - **Authentication:** JWT
-- **Deployment:** Heroku
 
 ## Installation
 1. Clone the repository:
